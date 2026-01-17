@@ -1,0 +1,7 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# ML artifacts (do NOT push models)
+ml/artifacts/
