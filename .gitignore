@@ -5,3 +5,12 @@ __pycache__/
 
 # ML artifacts (do NOT push models)
 ml/artifacts/
+
+# macOS
+.DS_Store
+
+# Databases
+backend/app/*.db
+
+# Datasets
+ml/data/

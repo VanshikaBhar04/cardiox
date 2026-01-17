@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CardioX – Heart Attack Risk Prediction</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>CardioX</h1>
+      <p>Clinician-facing prototype for probability-based heart attack risk prediction.</p>
+    </header>
+
+    <!-- Patient Input -->
+    <section class="card">
+      <h2>Patient Input</h2>
+
+      <div class="actions">
+        <button id="btnLoadExample" type="button">Load Example Patient</button>
+        <button id="btnClear" type="button" class="secondary">Clear</button>
+      </div>
+
+      <form id="predictForm">
+        <div class="grid">
+          <label>
+            Age
+            <input name="age" type="number" min="1" max="120" required />
+          </label>
+
+          <label>
+            Sex
+            <select name="sex" required>
+              <option value="">Select…</option>
+              <option>Male</option>
+              <option>Female</option>
+            </select>
+          </label>
+
+          <label>
+            Chest Pain (cp)
+            <select name="cp" required>
+              <option value="">Select…</option>
+              <option>typical angina</option>
+              <option>atypical angina</option>
+              <option>non-anginal</option>
+              <option>asymptomatic</option>
+            </select>
+          </label>
+
+          <label>
+            Resting BP (trestbps)
+            <input name="trestbps" type="number" min="50" max="250" step="1" />
+          </label>
+
+          <label>
+            Cholesterol (chol)
+            <input name="chol" type="number" min="50" max="800" step="1" />
+          </label>
+
+          <label>
+            Fasting Blood Sugar > 120 (fbs)
+            <select name="fbs" required>
+              <option value="">Select…</option>
+              <option>True</option>
+              <option>False</option>
+            </select>
+          </label>
+
+          <label>
+            Rest ECG (restecg)
+            <select name="restecg" required>
+              <option value="">Select…</option>
+              <option>normal</option>
+              <option>stt abnormality</option>
+              <option>lv hypertrophy</option>
+            </select>
+          </label>
+
+          <label>
+            Max Heart Rate (thalch)
+            <input name="thalch" type="number" min="60" max="250" step="1" />
+          </label>
+
+          <label>
+            Exercise-induced Angina (exang)
+            <select name="exang" required>
+              <option value="">Select…</option>
+              <option>True</option>
+              <option>False</option>
+            </select>
+          </label>
+
+          <label>
+            Oldpeak (ST depression)
+            <input name="oldpeak" type="number" min="0" max="10" step="0.1" />
+          </label>
+
+          <label>
+            Slope
+            <select name="slope" required>
+              <option value="">Select…</option>
+              <option>upsloping</option>
+              <option>flat</option>
+              <option>downsloping</option>
+            </select>
+          </label>
+
+          <label>
+            CA (0–3)
+            <input name="ca" type="number" min="0" max="3" step="1" />
+          </label>
+
+          <label>
+            Thal
+            <select name="thal" required>
+              <option value="">Select…</option>
+              <option>normal</option>
+              <option>fixed defect</option>
+              <option>reversable defect</option>
+            </select>
+          </label>
+        </div>
+
+        <button id="btnPredict" type="submit" class="primary">Predict Risk</button>
+      </form>
+
+      <div id="status" class="status" aria-live="polite"></div>
+    </section>
+
+    <!-- Prediction Result -->
+    <section class="card">
+      <h2>Prediction Result</h2>
+
+      <div class="result">
+        <div>
+          <div class="label">Estimated Risk</div>
+          <div id="riskPercent" class="big">—</div>
+        </div>
+
+        <div>
+          <div class="label">Risk Band</div>
+          <div id="riskBand" class="pill">—</div>
+        </div>
+      </div>
+
+      <p class="note">
+        This is a prototype decision-support indicator (probability-based), not a clinical diagnosis.
+      </p>
+    </section>
+
+    <!-- Prediction History -->
+    <section class="card">
+      <h2>Prediction History</h2>
+
+      <div class="actions">
+        <button id="btnLoadHistory" type="button">Load Prediction History</button>
+      </div>
+
+      <div id="history" class="history">
+        <p class="note">No history loaded yet.</p>
+      </div>
+    </section>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
