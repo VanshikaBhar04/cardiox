@@ -1,11 +1,16 @@
+// Base backend URL 
 const API_BASE = "http://127.0.0.1:8000";
+
+// Admin JWT token
 const token = localStorage.getItem("cardiox_token");
 
+// UI Elements
 const statusEl = document.getElementById("status");
 const clinicianListEl = document.getElementById("clinicianList");
 const btnRefresh = document.getElementById("btnRefresh");
 const btnLogout = document.getElementById("btnLogout");
 
+// Creating + Editing the clinician form
 const form = document.getElementById("createClinicianForm");
 const editingClinicianId = document.getElementById("editingClinicianId");
 const usernameOfClinician = document.getElementById("usernameOfClinician");
@@ -15,21 +20,22 @@ const lastNameOfClinician = document.getElementById("clinicianLastName");
 
 const btnCancelEdit = document.getElementById("btnCancelEdit");
 
+// Authenticating headers for admin API calls
 function authHeaders() {
   return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
 }
-
+// Show status message on admin dashboard
 function setStatus(msg, isError = false) {
   if (typeof msg === "object") msg = JSON.stringify(msg, null, 2);
   statusEl.textContent = msg;
   statusEl.style.color = isError ? "#dc2626" : "#475569";
 }
-
+// Clears localStorage and returns to login page
 function forceLogout() {
   localStorage.clear();
   window.location.replace("login.html");
 }
-
+// Reset form back to "Create clinician format"
 function resetForm() {
   editingClinicianId.value = "";
   usernameOfClinician.value = "";
@@ -40,7 +46,7 @@ function resetForm() {
   passwordOfClinician.placeholder = "Only needed for NEW clinician";
   setStatus("");
 }
-
+// Render clinicians list with Edit / Delete buttons
 function renderClinicians(items) {
   if (!items || items.length === 0) {
     clinicianListEl.innerHTML = `<p class="note">No clinicians found.</p>`;
@@ -63,6 +69,7 @@ function renderClinicians(items) {
     `;
   }).join("");
 
+// Editing clinician -> Only the name can be edited
   document.querySelectorAll("[data-edit]").forEach(btn => {
     btn.addEventListener("click", () => {
       const id = btn.getAttribute("data-edit");
@@ -81,7 +88,7 @@ function renderClinicians(items) {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   });
-
+// Deleting a clinician's account
   document.querySelectorAll("[data-del]").forEach(btn => {
     btn.addEventListener("click", async () => {
       const id = btn.getAttribute("data-del");
@@ -104,6 +111,7 @@ function renderClinicians(items) {
   });
 }
 
+//Fetching all the clinicians from the backend
 async function loadClinicians() {
   setStatus("Loading clinicians...");
   const res = await fetch(`${API_BASE}/admin/clinicians`, { headers: authHeaders() });
@@ -113,6 +121,7 @@ async function loadClinicians() {
   setStatus("Clinicians loaded.");
 }
 
+// Form will be submitted _> A new clinician created or an existing clinician name is updated
 form?.addEventListener("submit", async (e) => {
   e.preventDefault();
 

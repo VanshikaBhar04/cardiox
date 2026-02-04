@@ -32,7 +32,7 @@ def predict_risk(patient: dict) -> dict:
     }
 
 if __name__ == "__main__":
-    # Quick test example (edit values if you want)
+    # This is an example patient
     example_patient = {
         "age": 63,
         "sex": "Male",

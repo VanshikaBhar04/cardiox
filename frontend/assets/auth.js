@@ -1,6 +1,7 @@
+// Backend endpoint which is used to authenticate both admin and clinicians
 const AUTH_URL = "http://127.0.0.1:8000/auth/login";
 
-// Save session to localStorage
+// Save session to localStorage so user is logged in across pages
 function setSession({ access_token, role, username }) {
   localStorage.setItem("cardiox_token", access_token);
   localStorage.setItem("cardiox_role", role);

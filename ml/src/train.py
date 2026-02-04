@@ -10,9 +10,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
 
-# ===============================
-# 1. Load and clean dataset
-# ===============================
+
+# Loading and cleaning the dataset
 DATA_PATH = "data/heart_disease_uci.csv"
 df = pd.read_csv(DATA_PATH)
 
@@ -23,15 +22,13 @@ df = df.drop(columns=["num"])
 X = df.drop(columns=["target"])
 y = df["target"]
 
-# ===============================
-# 2. Feature types
-# ===============================
+# The list of features from the dataset
+
 numerical_features = ["age", "trestbps", "chol", "thalch", "oldpeak", "ca"]
 categorical_features = ["sex", "cp", "fbs", "restecg", "exang", "slope", "thal"]
 
-# ===============================
-# 3. Preprocessor
-# ===============================
+# Preprocessoring step
+
 numeric_pipeline = Pipeline([
     ("imputer", SimpleImputer(strategy="median")),
     ("scaler", StandardScaler())
@@ -47,16 +44,12 @@ preprocessor = ColumnTransformer([
     ("cat", categorical_pipeline, categorical_features)
 ])
 
-# ===============================
-# 4. Split
-# ===============================
+# Splitting data into training and testing
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# ===============================
-# 5. Train models for comparison
-# ===============================
+# Training the models for comparison
 log_reg = Pipeline([
     ("preprocessor", preprocessor),
     ("model", LogisticRegression(max_iter=2000))
@@ -84,18 +77,16 @@ print("\n=== Final Comparison (ROC-AUC) ===")
 print("Logistic Regression:", round(log_auc, 4))
 print("Random Forest:", round(rf_auc, 4))
 
-# ===============================
-# 6. Select final model (best AUC)
-# ===============================
+# Selecting the final based on the highest AUC
+
 final_model = rf if rf_auc >= log_auc else log_reg
 final_name = "random_forest" if rf_auc >= log_auc else "logistic_regression"
 
 print("\nSelected final model:", final_name)
 print(f"Example risk: {final_model.predict_proba(X_test.iloc[[0]])[:,1][0]*100:.2f}%")
 
-# ===============================
-# 7. Save artifacts
-# ===============================
+# Saving the artifacts
+
 os.makedirs("artifacts", exist_ok=True)
 
 joblib.dump(final_model, "artifacts/final_model.joblib")

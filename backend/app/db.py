@@ -4,20 +4,21 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional
 
+# Path to the SQLite database file - stored in cardiox.db
 DB_PATH = Path(__file__).resolve().parent / "cardiox.db"
 
-
+# DB connection helper
 def get_conn():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
-
+# Initialising the database + creating all tables if missing + adding extra columns safely
 def init_db():
     conn = get_conn()
     cur = conn.cursor()
 
-    # legacy predictions table
+    # Old and simple table - this was used early in development
     cur.execute("""
         CREATE TABLE IF NOT EXISTS predictions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,7 +31,7 @@ def init_db():
         );
     """)
 
-    # The users table
+    # Users table (for clincian and admin)
     cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,8 +41,7 @@ def init_db():
             role TEXT NOT NULL CHECK(role IN ('admin', 'clinician'))
         );
     """)
-
-    # Safe migration: clinician fields
+ # Adding new user profile columns if they dont exist - helpful for safe migration
     for col_sql in [
         "ALTER TABLE users ADD COLUMN first_name TEXT",
         "ALTER TABLE users ADD COLUMN last_name TEXT",
@@ -52,13 +52,13 @@ def init_db():
         except sqlite3.OperationalError:
             pass
 
-    # Unique clinician uid
+   # Make the clinician_uid unique (prevents duplication)
     cur.execute("""
         CREATE UNIQUE INDEX IF NOT EXISTS idx_users_clinician_uid
         ON users (clinician_uid)
     """)
 
-    # patients table
+ #  Patients table (created / managed by clinicians)
     cur.execute("""
         CREATE TABLE IF NOT EXISTS patients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,7 +73,7 @@ def init_db():
         );
     """)
 
-    # assessments table (NEW)
+ # Assessments table (stores the full clinical form + ML output)
     cur.execute("""
         CREATE TABLE IF NOT EXISTS assessments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -106,9 +106,9 @@ def init_db():
     conn.close()
 
 
+ # Users - Authorization
 
-# The Users
-
+ # Look up a user row by username (this was used during login)
 def get_user_by_username(username: str) -> Optional[dict]:
     conn = get_conn()
     cur = conn.cursor()
@@ -117,7 +117,7 @@ def get_user_by_username(username: str) -> Optional[dict]:
     conn.close()
     return dict(row) if row else None
 
-
+ # Returns profile information for a user (used for /profile/me)
 def get_user_by_id(user_id: int) -> Optional[dict]:
     conn = get_conn()
     cur = conn.cursor()
@@ -129,7 +129,7 @@ def get_user_by_id(user_id: int) -> Optional[dict]:
     conn.close()
     return dict(row) if row else None
 
-
+ # Creates a new user (used for default admin creation at start-up)
 def create_user(username: str, password_hash: str, role: str) -> int:
     conn = get_conn()
     cur = conn.cursor()
@@ -142,15 +142,15 @@ def create_user(username: str, password_hash: str, role: str) -> int:
     conn.close()
     return new_id
 
+ # Admin - Clinician CRUD operations
 
-# Clinicians (Admin)
-
+ # Creates a readable unique clinician ID 
 def generate_clinician_uid() -> str:
     date_part = datetime.utcnow().strftime("%Y%m%d")
     rand_part = secrets.token_hex(2).upper()
     return f"CLN-{date_part}-{rand_part}"
 
-
+ # Creates a clinician account with auto-generated clinician_uid
 def create_clinician_user(username: str, password_hash: str, first_name: str, last_name: str) -> dict:
     """
     Auto-generates clinician_uid and returns {"id": int, "clinician_uid": str}
@@ -175,7 +175,7 @@ def create_clinician_user(username: str, password_hash: str, first_name: str, la
         except sqlite3.IntegrityError:
             clinician_uid = generate_clinician_uid()
 
-
+ # Returns all clinician users for the admin dashboard list
 def list_clinicians() -> list[dict]:
     conn = get_conn()
     cur = conn.cursor()
@@ -189,7 +189,7 @@ def list_clinicians() -> list[dict]:
     conn.close()
     return [dict(r) for r in rows]
 
-
+ # Updates clinician profile name fields only
 def update_clinician(clinician_id: int, first_name: str, last_name: str) -> bool:
     conn = get_conn()
     cur = conn.cursor()
@@ -206,7 +206,7 @@ def update_clinician(clinician_id: int, first_name: str, last_name: str) -> bool
     conn.close()
     return ok
 
-
+ # Deletes a clinician account by ID
 def delete_clinician(clinician_id: int) -> bool:
     conn = get_conn()
     cur = conn.cursor()
@@ -217,15 +217,15 @@ def delete_clinician(clinician_id: int) -> bool:
     return ok
 
 
+ # Clinician: Paient CRUD Operations
 
-# Patients (Clinician)
-
+ # Creates a readable unique patient ID
 def generate_patient_uid() -> str:
     date_part = datetime.utcnow().strftime("%Y%m%d")
     rand_part = secrets.token_hex(2).upper()
     return f"P-{date_part}-{rand_part}"
 
-
+ # Creates a patient record and returns the created patient object
 def create_patient(first_name: str, last_name: str, dob: str, sex: str, created_by_user_id: int) -> dict:
     conn = get_conn()
     cur = conn.cursor()
@@ -254,7 +254,7 @@ def create_patient(first_name: str, last_name: str, dob: str, sex: str, created_
         except sqlite3.IntegrityError:
             patient_uid = generate_patient_uid()
 
-
+ # Retrieves a single patient by their unqiue patient_uid
 def get_patient_by_uid(patient_uid: str) -> Optional[dict]:
     conn = get_conn()
     cur = conn.cursor()
@@ -263,7 +263,7 @@ def get_patient_by_uid(patient_uid: str) -> Optional[dict]:
     conn.close()
     return dict(row) if row else None
 
-
+ # Searches patient by their partial name match or exact patient_uid
 def search_patients(patient_uid: str = "", name: str = "", limit: int = 25) -> list[dict]:
     conn = get_conn()
     cur = conn.cursor()
@@ -292,7 +292,7 @@ def search_patients(patient_uid: str = "", name: str = "", limit: int = 25) -> l
     conn.close()
     return [dict(r) for r in rows]
 
-
+ # Updates a patient's demographic details
 def update_patient_by_uid(patient_uid: str, first_name: str, last_name: str, dob: str, sex: str) -> Optional[dict]:
     conn = get_conn()
     cur = conn.cursor()
@@ -312,9 +312,9 @@ def update_patient_by_uid(patient_uid: str, first_name: str, last_name: str, dob
     return get_patient_by_uid(patient_uid)
 
 
+ # Clinician - Assessment CRUD operations
 
-# Adding new Assessments
-
+ # Stores a completed assessment in the database + all clinical form inputs + predicted risk percentage + bank
 def create_assessment(clinician_id: int, patient_uid: str, inputs: dict, risk_percent: float, risk_band: str) -> dict:
     conn = get_conn()
     cur = conn.cursor()
@@ -342,8 +342,10 @@ def create_assessment(clinician_id: int, patient_uid: str, inputs: dict, risk_pe
     conn.commit()
     new_id = cur.lastrowid
     conn.close()
+     # Returns only key summary fields
     return {"id": new_id, "created_at": created_at, "patient_uid": patient_uid, "risk_percent": risk_percent, "risk_band": risk_band}
 
+ # Loads one assessment record (when edit is clicked) + ensure clinician can only load their own assessments
 def get_assessment_by_id(assessment_id: int, clinician_id: int) -> Optional[dict]:
     conn = get_conn()
     cur = conn.cursor()
@@ -355,7 +357,7 @@ def get_assessment_by_id(assessment_id: int, clinician_id: int) -> Optional[dict
     conn.close()
     return dict(row) if row else None
 
-
+ # Returns assessment history list for a patient + Used on clinician dashboard + assessment page history section
 def list_assessments(patient_uid: str, clinician_id: int, limit: int = 50) -> list[dict]:
     conn = get_conn()
     cur = conn.cursor()
@@ -372,18 +374,7 @@ def list_assessments(patient_uid: str, clinician_id: int, limit: int = 50) -> li
     conn.close()
     return [dict(r) for r in rows]
 
-def get_assessment_by_id(assessment_id: int, clinician_id: int) -> Optional[dict]:
-    conn = get_conn()
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT * FROM assessments WHERE id = ? AND clinician_id = ?",
-        (assessment_id, clinician_id)
-    )
-    row = cur.fetchone()
-    conn.close()
-    return dict(row) if row else None
-
-
+ # Updates an exisiting assessment record with edited inputs + new ML prediction
 def update_assessment(assessment_id: int, clinician_id: int, inputs: dict, risk_percent: float, risk_band: str) -> bool:
     conn = get_conn()
     cur = conn.cursor()
@@ -409,7 +400,7 @@ def update_assessment(assessment_id: int, clinician_id: int, inputs: dict, risk_
     conn.close()
     return ok
 
-
+ # Deletes a specific assessment record - clinician can only delete their own
 def delete_assessment(assessment_id: int, clinician_id: int) -> bool:
     conn = get_conn()
     cur = conn.cursor()
