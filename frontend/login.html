@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CardioX Login</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>CardioX</h1>
+      <p>Secure access for Admins and Clinicians.</p>
+    </header>
+
+    <section class="card">
+      <h2>Login</h2>
+
+      <form id="loginForm" class="form-grid" style="max-width:520px;">
+        <label>
+          Username
+          <input id="username" type="text" required />
+        </label>
+
+        <label>
+          Password
+          <input id="password" type="password" required />
+        </label>
+
+        <button type="submit" class="btn primary">Sign in</button>
+        <p id="status" class="status"></p>
+      </form>
+
+      <p class="disclaimer">
+        For Demo, use these credentials: <strong>admin</strong> / <strong>admin123</strong>
+      </p>
+    </section>
+  </div>
+
+  <script src="assets/auth.js"></script>
+</body>
+</html>

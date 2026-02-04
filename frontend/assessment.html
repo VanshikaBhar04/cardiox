@@ -1,31 +1,46 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CardioX – Heart Attack Risk Prediction</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CardioX Assessment</title>
   <link rel="stylesheet" href="assets/styles.css" />
   <script>
-  if (!localStorage.getItem("cardiox_token")) {
-    window.location.replace("login.html");
-  }
-</script>
-
+    // Guard: must be logged in as clinician
+    const role = localStorage.getItem("cardiox_role");
+    if (!localStorage.getItem("cardiox_token") || role !== "clinician") {
+      window.location.replace("login.html");
+    }
+  </script>
 </head>
-
 <body>
   <div class="container">
-    <header>
-      <h1>CardioX</h1>
-      <p>Clinician-facing prototype for probability-based heart attack risk prediction.</p>
-    </header>
-
-    <!-- This is for the Patient Input -->
-    <section class="card">
-      <h2>Patient Input</h2>
+    <header class="header">
+      <h1 id="welcomeTitle">Clinical Assessment</h1>
+      <p>Review patient details, enter clinical attributes, and generate risk prediction.</p>
 
       <div class="actions">
-        <button id="btnLoadExample" type="button">Load Example Patient</button>
+        <button id="btnBack" type="button" class="secondary">Back to Dashboard</button>
+        <button id="btnLogout" type="button" class="secondary">Log out</button>
+      </div>
+    </header>
+
+    <!-- Selected Patient Summary -->
+    <section class="card">
+      <h2>Patient Summary</h2>
+      <div id="patientSummary">
+        <p class="note">Loading patient...</p>
+      </div>
+    </section>
+
+
+    <!-- Clinical Attributes + Prediction -->
+    <section class="card">
+      <h2>Clinical Attributes</h2>
+      <p class="note">Age and Sex are auto-filled from the patient record.</p>
+
+      <div class="actions">
+        <button id="btnLoadExample" type="button">Load Example</button>
         <button id="btnClear" type="button" class="secondary">Clear</button>
       </div>
 
@@ -58,12 +73,12 @@
 
           <label>
             Resting BP (trestbps)
-            <input name="trestbps" type="number" min="50" max="250" step="1" />
+            <input name="trestbps" type="number" min="50" max="250" />
           </label>
 
           <label>
             Cholesterol (chol)
-            <input name="chol" type="number" min="50" max="800" step="1" />
+            <input name="chol" type="number" min="50" max="800" />
           </label>
 
           <label>
@@ -87,7 +102,7 @@
 
           <label>
             Max Heart Rate (thalch)
-            <input name="thalch" type="number" min="60" max="250" step="1" />
+            <input name="thalch" type="number" min="60" max="250" />
           </label>
 
           <label>
@@ -100,7 +115,7 @@
           </label>
 
           <label>
-            Oldpeak (ST depression)
+            Oldpeak
             <input name="oldpeak" type="number" min="0" max="10" step="0.1" />
           </label>
 
@@ -115,8 +130,8 @@
           </label>
 
           <label>
-            CA (0–3)
-            <input name="ca" type="number" min="0" max="3" step="1" />
+            CA
+            <input name="ca" type="number" min="0" max="3" />
           </label>
 
           <label>
@@ -130,13 +145,19 @@
           </label>
         </div>
 
-        <button id="btnPredict" type="submit" class="primary">Predict Risk</button>
-      </form>
+        <div class="actions" style="margin-top:12px;">
+          <button type="submit" class="primary">Predict Risk</button>
 
-      <div id="status" class="status" aria-live="polite"></div>
+          <!-- buttons shown only (do not need to work yet) -->
+          <button id="btnRecommendation" type="button">Prevention Guideline / Recommendation</button>
+          <button id="btnExportReport" type="button" class="secondary">Export Report</button>
+        </div>
+
+        <p id="statusPredict" class="status" aria-live="polite"></p>
+      </form>
     </section>
 
-    <!-- This is the Prediction Result -->
+    <!-- Prediction Result -->
     <section class="card">
       <h2>Prediction Result</h2>
 
@@ -156,21 +177,9 @@
         This is a prototype decision-support indicator (probability-based), not a clinical diagnosis.
       </p>
     </section>
-
-    <!-- This is the Prediction History -->
-    <section class="card">
-      <h2>Prediction History</h2>
-
-      <div class="actions">
-        <button id="btnLoadHistory" type="button">Load Prediction History</button>
-      </div>
-
-      <div id="history" class="history">
-        <p class="note">No history loaded yet.</p>
-      </div>
-    </section>
   </div>
 
-  <script src="assets/app.js" defer></script>
+  <script src="assets/assessment.js" defer></script>
 </body>
 </html>
+ 

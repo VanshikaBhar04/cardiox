@@ -1,12 +1,17 @@
-const API_URL = "http://127.0.0.1:8001/predict";
-const HISTORY_URL = "http://127.0.0.1:8001/predictions";
+// --- Auth guard: require login ---
+const token = localStorage.getItem("cardiox_token");
+if (!token) {
+  window.location.href = "login.html";
+}
 
+const API_URL = "http://127.0.0.1:8000/predict";
+const HISTORY_URL = "http://127.0.0.1:8000/predictions";
 
 
 const form = document.getElementById("predictForm");
 const statusEl = document.getElementById("status");
-const riskPercentEl = document.getElementById("riskPercent");
-const riskBandEl = document.getElementById("riskBand");
+const percentageOfRiskEl = document.getElementById("percentageOfRisk");
+const bandOfRiskEl = document.getElementById("bandOfRisk");
 
 const btnLoadExample = document.getElementById("btnLoadExample");
 const btnClear = document.getElementById("btnClear");
@@ -15,29 +20,28 @@ const btnLoadHistory = document.getElementById("btnLoadHistory");
 const historyEl = document.getElementById("history");
 
 
-// ---------------------
-// Helper functions
-// ---------------------
+// ----- These are helper Functions ----- 
+
 function setStatus(msg, isError = false) {
   statusEl.textContent = msg;
   statusEl.style.color = isError ? "#ff6b6b" : "#aab4e6";
 }
 
-function setResult(riskPercent, riskBand) {
-  riskPercentEl.textContent = `${riskPercent}%`;
-  riskBandEl.textContent = riskBand;
+function setResult(percentageOfRisk, bandOfRisk) {
+  percentageOfRiskEl.textContent = `${percentageOfRisk}%`;
+  bandOfRiskEl.textContent = bandOfRisk;
 
-  riskBandEl.style.background =
-    riskBand === "High"
+  bandOfRiskEl.style.background =
+    bandOfRisk === "High"
       ? "rgba(255,107,107,0.25)"
-      : riskBand === "Moderate"
+      : bandOfRisk === "Moderate"
       ? "rgba(255,212,59,0.25)"
       : "rgba(105,219,124,0.25)";
 }
 
-// ---------------------
-// Load example patient
-// ---------------------
+
+// ----- Used to Load an example patient ----- 
+
 btnLoadExample.addEventListener("click", () => {
   form.age.value = 63;
   form.sex.value = "Male";
@@ -56,19 +60,19 @@ btnLoadExample.addEventListener("click", () => {
   setStatus("Example patient loaded.");
 });
 
-// ---------------------
-// Clear form
-// ---------------------
+
+// ----- Clearing the form ----- 
+
 btnClear.addEventListener("click", () => {
   form.reset();
-  riskPercentEl.textContent = "—";
-  riskBandEl.textContent = "—";
+  percentageOfRiskEl.textContent = "—";
+  bandOfRiskEl.textContent = "—";
   setStatus("");
 });
 
-// ---------------------
-// Submit + call API
-// ---------------------
+
+// ----- Submitting and then calling the API ----- 
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   setStatus("Predicting risk...");
@@ -138,7 +142,12 @@ btnLoadHistory.addEventListener("click", async () => {
   setStatus("Loading prediction history...");
 
   try {
-    const res = await fetch(HISTORY_URL);
+    const res = await fetch(HISTORY_URL, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
     if (!res.ok) throw new Error(`History API error (${res.status})`);
 
     const items = await res.json();
@@ -149,4 +158,3 @@ btnLoadHistory.addEventListener("click", async () => {
     setStatus("Failed to load history. Is the backend running?", true);
   }
 });
-

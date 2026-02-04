@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CardioX Clinician Dashboard</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <script>
+    const role = localStorage.getItem("cardiox_role");
+    if (!localStorage.getItem("cardiox_token") || role !== "clinician") {
+      window.location.replace("login.html");
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 id="welcomeTitle">Clinician Dashboard</h1>
+      <p>Manage patients, then start a clinical assessment.</p>
+      <div class="actions">
+        <button id="btnLogout" type="button" class="secondary">Log out</button>
+      </div>
+    </header>
+
+        <!-- Adding a new patient -->
+    <section class="card">
+      <h2>Add New Patient</h2>
+      <form id="addPatientForm" class="form-grid" style="max-width:720px;">
+        <label>First Name <input id="firstNameOfNewPatient" type="text" required /></label>
+        <label>Last Name <input id="lastNameOfNewPatient" type="text" required /></label>
+        <label>DOB <input id="dateOfBirthOfNewPatient" type="date" required /></label>
+        <label>Sex
+          <select id="sexOfNewPatient" required>
+            <option value="">Select…</option>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+        </label>
+        <button type="submit" class="primary">Create Patient</button>
+        <p id="addPatientStatus" class="status"></p>
+      </form>
+    </section>
+
+        <!-- Searching for patients -->
+    <section class="card">
+      <h2>Search Patient</h2>
+      <form id="searchForm" class="form-grid" style="max-width:520px;">
+        <label>Patient ID or Name
+          <input id="searchQuery" type="text" placeholder="e.g. P-20260125-6480 or Aisha" required />
+        </label>
+        <button type="submit" class="primary">Search</button>
+        <p id="status" class="status"></p>
+      </form>
+
+      <div id="searchResults" class="history">
+        <p class="note">No results yet.</p>
+      </div>
+    </section>
+
+        <!-- Selecting a patient -->
+    <section class="card">
+      <h2>Selected Patient</h2>
+      <div id="patientDetails">
+        <p class="note">No patient selected yet.</p>
+      </div>
+
+      <div class="actions">
+        <button id="btnStartAssessment" type="button" class="primary" disabled>
+          Start Clinical Assessment
+        </button>
+      </div>
+
+      <p class="note">Select a patient to begin assessment.</p>
+    </section>
+
+    <section class="card" id="assessmentHistorySection" style="display:none;">
+      <h2>Assessment History</h2>
+      <div id="assessmentHistory" class="history">
+        <p class="note">No assessments loaded.</p>
+      </div>
+    </section>
+    <!-- Editing a patient's record -->
+    <section class="card" id="editPatientSection" style="display:none;">
+      <h2>Edit Patient</h2>
+      <form id="editPatientForm" class="form-grid" style="max-width:720px;">
+        <label>First Name <input id="editFirstName" type="text" required /></label>
+        <label>Last Name <input id="editLastName" type="text" required /></label>
+        <label>DOB <input id="editDob" type="date" required /></label>
+        <label>Sex
+          <select id="editSex" required>
+            <option value="">Select…</option>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+        </label>
+
+        <button type="submit" class="primary">Save Changes</button>
+        <p id="editPatientStatus" class="status"></p>
+      </form>
+    </section>
+  </div>
+
+  <script src="assets/clinician.js" defer></script>
+</body>
+</html>

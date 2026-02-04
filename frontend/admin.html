@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CardioX Admin Dashboard</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <script>
+    const role = localStorage.getItem("cardiox_role");
+    if (!token || role !== "admin") window.location.replace("login.html");
+  </script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>Admin Dashboard</h1>
+      <p>Manage clinician accounts.</p>
+      <div class="actions">
+        <button id="btnLogout" type="button" class="secondary">Log out</button>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Create / Update Clinician</h2>
+      <form id="createClinicianForm" class="form-grid" style="max-width:520px;">
+        <input id="editingClinicianId" type="hidden" />
+
+        <label>Clinician Username
+          <input id="usernameOfClinician" type="text" required />
+        </label>
+
+        <label>Clinician Password
+          <input id="passwordOfClinician" type="password" placeholder="Only needed for NEW clinician" />
+        </label>
+
+        <label>First Name
+          <input id="clinicianFirstName" type="text" required />
+        </label>
+
+        <label>Last Name
+          <input id="clinicianLastName" type="text" required />
+        </label>
+
+        <div class="actions">
+          <button id="btnSubmitClinician" type="submit" class="primary">Save Clinician</button>
+          <button id="btnCancelEdit" type="button" class="secondary">Cancel Edit</button>
+        </div>
+
+        <p id="status" class="status"></p>
+      </form>
+
+      <p class="note">Clinician ID is auto-generated.</p>
+    </section>
+
+    <section class="card">
+      <h2>Clinicians</h2>
+      <div class="actions">
+        <button id="btnRefresh" type="button">Refresh the List</button>
+      </div>
+
+      <div id="clinicianList" class="history">
+        <p class="note">No clinicians loaded yet.</p>
+      </div>
+    </section>
+  </div>
+
+  <script src="assets/admin.js" defer></script>
+</body>
+</html>
+
