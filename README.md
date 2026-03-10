@@ -9,7 +9,7 @@ CardioX is a clinician-facing prototype that predicts a probability-based heart 
 - `backend/` – FastAPI API (`/predict`, `/predictions`)
 - `frontend/` – HTML/CSS/JS UI calling the API
 
-https://sites.google.com/view/cardioxpredictor/home
+
 ---
 
 ## Requirements
@@ -20,15 +20,6 @@ https://sites.google.com/view/cardioxpredictor/home
 - Frontend runs on: `http://127.0.0.1:5500`
 
 ---
-
-## Run the Backend (FastAPI)
-Open a terminal:
-
-```bash
-cd backend
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
 
 ---
 
@@ -56,3 +47,14 @@ https://sites.google.com/view/cardioxpredictor/home
 ## Project Purpose
 
 This repository demonstrates the technical concept behind CardioX alongside the digital marketing and search engine optimisation (SEO) strategy used to promote the CardioX microsite. The project illustrates how healthcare AI solutions can be communicated through structured digital marketing, keyword optimisation, and targeted B2B outreach to NHS organisations.
+
+---
+## Run the Backend (FastAPI)
+Open a terminal:
+
+```bash
+cd backend
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+
