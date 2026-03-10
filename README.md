@@ -21,8 +21,6 @@ CardioX is a clinician-facing prototype that predicts a probability-based heart 
 
 ---
 
----
-
 # CardioX – AI Heart Attack Risk Assessment System
 
 CardioX is an AI-powered cardiovascular risk prediction platform designed to support clinicians and NHS healthcare professionals in assessing a patient’s probability of experiencing a heart attack. The system analyses structured clinical data using machine learning and generates interpretable, probability-based risk scores to assist clinical decision-making.
