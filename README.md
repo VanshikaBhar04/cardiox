@@ -39,7 +39,7 @@ The system generates probability-based cardiovascular risk scores based on struc
 ## CardioX Microsite
 Learn more about the CardioX platform here:
 
-🔗 https://sites.google.com/view/cardioxpredictor/home
+🔗 [Visit the CardioX Microsite](https://sites.google.com/view/cardioxpredictor/home)
 
 ## Key Features
 - AI-powered cardiovascular risk prediction
