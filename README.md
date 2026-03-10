@@ -50,3 +50,5 @@ Learn more about the CardioX platform here:
 
 ## Purpose
 This repository demonstrates the digital marketing and SEO strategy for the CardioX microsite, including search optimisation and healthcare-focused keyword strategy.
+
+https://sites.google.com/view/cardioxpredictor/home
