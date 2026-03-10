@@ -30,7 +30,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 
 
-# CardioX – AI Heart Attack Risk Assessment System
+## CardioX – AI Heart Attack Risk Assessment System
 
 CardioX is an AI-powered cardiovascular risk prediction platform designed to support clinicians and NHS healthcare professionals with interpretable heart attack risk assessment.
 
