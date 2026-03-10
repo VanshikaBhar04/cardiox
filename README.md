@@ -9,6 +9,7 @@ CardioX is a clinician-facing prototype that predicts a probability-based heart 
 - `backend/` – FastAPI API (`/predict`, `/predictions`)
 - `frontend/` – HTML/CSS/JS UI calling the API
 
+https://sites.google.com/view/cardioxpredictor/home
 ---
 
 ## Requirements
