@@ -5,37 +5,83 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>CardioX Login</title>
   <link rel="stylesheet" href="assets/styles.css" />
+  <script src="assets/session.js"></script>
+  <script>
+    const session = getSession();
+    if (session.token && session.role) {
+      window.location.replace(getDashboardUrlByRole(session.role));
+    }
+  </script>
 </head>
-<body>
-  <div class="container">
-    <header class="header">
-      <h1>CardioX</h1>
-      <p>Secure access for Admins and Clinicians.</p>
-    </header>
 
-    <section class="card">
-      <h2>Login</h2>
+<div id="navbarContainer"></div>
+<script src="assets/navbar.js"></script>
 
-      <form id="loginForm" class="form-grid" style="max-width:520px;">
-        <label>
-          Username
-          <input id="username" type="text" required />
-        </label>
+  <main class="auth-shell">
+    <section class="auth-layout">
 
-        <label>
-          Password
-          <input id="password" type="password" required />
-        </label>
+      <div class="auth-hero-panel">
+        <span class="hero-badge">Secure Access</span>
+        <h1>Welcome back to CardioX.</h1>
+        <p>
+          Sign in to continue into the CardioX platform and access the workflow relevant to your role.
+        </p>
 
-        <button type="submit" class="btn primary">Sign in</button>
-        <p id="status" class="status"></p>
-      </form>
+        <div class="auth-feature-list">
+          <div class="auth-feature-item">
+            <strong>Clinician workflow</strong>
+            <span>Manage patient records, run structured assessments, review explainability, and export reports.</span>
+          </div>
 
-      <p class="disclaimer">
-        For Demo, use these credentials: <strong>admin</strong> / <strong>admin123</strong>
-      </p>
+          <div class="auth-feature-item">
+            <strong>Admin workflow</strong>
+            <span>Review pending requests, manage users, and monitor audit activity across the platform.</span>
+          </div>
+
+          <div class="auth-feature-item">
+            <strong>Streamlined access</strong>
+            <span>Your session stays active so you can move through the system without repeated login prompts.</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="card auth-card auth-card-wide">
+        <div class="auth-card-header">
+          <h2>Login</h2>
+          <p>Secure access for Admins and Clinicians.</p>
+        </div>
+
+        <form id="loginForm" class="form-grid auth-form-grid">
+          <label>
+            Username <span class="required-star">*</span>
+            <input id="username" type="text" required />
+          </label>
+
+          <label>
+            Password <span class="required-star">*</span>
+            <input id="password" type="password" required />
+          </label>
+
+          <div class="auth-form-actions">
+            <button type="submit" class="primary auth-submit-btn">Sign in</button>
+          </div>
+
+          <p id="status" class="status"></p>
+        </form>
+
+        <div class="auth-info-box">
+          <strong>Demo account</strong>
+          <span>For demo, use: admin / admin123</span>
+        </div>
+
+        <p class="auth-footer-text">
+          Need clinician access?
+          <a href="signup.html" class="inline-link">Request an account</a>
+        </p>
+      </section>
+
     </section>
-  </div>
+  </main>
 
   <script src="assets/auth.js"></script>
 </body>

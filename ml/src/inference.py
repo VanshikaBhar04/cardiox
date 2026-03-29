@@ -10,7 +10,7 @@ def risk_band(risk_percent: float) -> str:
     """Simple prototype bands for UI (not clinical thresholds)."""
     if risk_percent < 30:
         return "Low"
-    if risk_percent < 70:
+    if risk_percent < 60:
         return "Moderate"
     return "High"
 

@@ -1,33 +1,39 @@
-// Backend endpoint which is used to authenticate both admin and clinicians
 const AUTH_URL = "http://127.0.0.1:8000/auth/login";
 
-// Save session to localStorage so user is logged in across pages
+const loginForm = document.getElementById("loginForm");
+const loginStatus = document.getElementById("status");
+const btnLoginSubmit = document.getElementById("btnLoginSubmit");
+
 function setSession({ access_token, role, username }) {
   localStorage.setItem("cardiox_token", access_token);
   localStorage.setItem("cardiox_role", role);
   localStorage.setItem("cardiox_username", username);
 }
 
-// Optional helpers
-function getToken() {
-  return localStorage.getItem("cardiox_token");
+function setLoginStatus(message, isError = false) {
+  if (!loginStatus) return;
+  loginStatus.textContent = message;
+  loginStatus.style.color = isError ? "#dc2626" : "#475569";
 }
 
-function clearSession() {
-  localStorage.removeItem("cardiox_token");
-  localStorage.removeItem("cardiox_role");
-  localStorage.removeItem("cardiox_username");
+function setLoginButtonLoading(isLoading) {
+  if (!btnLoginSubmit) return;
+  btnLoginSubmit.disabled = isLoading;
+  btnLoginSubmit.textContent = isLoading ? "Signing In..." : "Sign in";
 }
 
-// Handle login form submission
-document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
+loginForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
-
-  const status = document.getElementById("status");
-  status.textContent = "Signing in...";
 
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
+
+  if (!username || !password) {
+    return setLoginStatus("Please enter your username and password.", true);
+  }
+
+  setLoginButtonLoading(true);
+  setLoginStatus("Signing in...");
 
   try {
     const res = await fetch(AUTH_URL, {
@@ -36,17 +42,15 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
       body: JSON.stringify({ username, password }),
     });
 
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      status.textContent = data.detail || "Login failed";
-      return;
+      setLoginButtonLoading(false);
+      return setLoginStatus(data.detail || "Login failed.", true);
     }
 
-    // Store token + role + username
     setSession(data);
 
-    // Redirect based on role
     if (data.role === "admin") {
       window.location.href = "admin.html";
     } else if (data.role === "clinician") {
@@ -55,6 +59,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
       window.location.href = "index.html";
     }
   } catch (err) {
-    status.textContent = "Network error. Is the backend running?";
+    setLoginButtonLoading(false);
+    setLoginStatus("Network error. Please make sure the backend is running.", true);
   }
 });

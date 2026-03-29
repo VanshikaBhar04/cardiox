@@ -1,187 +1,473 @@
-// Base backend URL 
 const API_BASE = "http://127.0.0.1:8000";
-
-// Admin JWT token
 const token = localStorage.getItem("cardiox_token");
 
-// UI Elements
-const statusEl = document.getElementById("status");
-const clinicianListEl = document.getElementById("clinicianList");
-const btnRefresh = document.getElementById("btnRefresh");
-const btnLogout = document.getElementById("btnLogout");
+const userTableBody = document.getElementById("userTableBody");
+const pendingTableBody = document.getElementById("pendingTableBody");
+const auditTableBody = document.getElementById("auditTableBody");
+const adminStatus = document.getElementById("adminStatus");
 
-// Creating + Editing the clinician form
-const form = document.getElementById("createClinicianForm");
-const editingClinicianId = document.getElementById("editingClinicianId");
-const usernameOfClinician = document.getElementById("usernameOfClinician");
-const passwordOfClinician = document.getElementById("passwordOfClinician");
-const firstNameOfClinician = document.getElementById("clinicianFirstName");
-const lastNameOfClinician = document.getElementById("clinicianLastName");
+const btnRefreshUsers = document.getElementById("btnRefreshUsers");
+const btnRefreshPending = document.getElementById("btnRefreshPending");
+const btnRefreshAudit = document.getElementById("btnRefreshAudit");
 
-const btnCancelEdit = document.getElementById("btnCancelEdit");
+const editUserSection = document.getElementById("editUserSection");
+const editUserForm = document.getElementById("editUserForm");
+const editingUserId = document.getElementById("editingUserId");
+const editUserFirstName = document.getElementById("editUserFirstName");
+const editUserLastName = document.getElementById("editUserLastName");
+const editUserRole = document.getElementById("editUserRole");
+const editUserDepartment = document.getElementById("editUserDepartment");
+const btnCancelUserEdit = document.getElementById("btnCancelUserEdit");
 
-// Authenticating headers for admin API calls
+let cachedUsers = [];
+
 function authHeaders() {
-  return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+  return {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`
+  };
 }
-// Show status message on admin dashboard
-function setStatus(msg, isError = false) {
-  if (typeof msg === "object") msg = JSON.stringify(msg, null, 2);
-  statusEl.textContent = msg;
-  statusEl.style.color = isError ? "#dc2626" : "#475569";
-}
-// Clears localStorage and returns to login page
+
 function forceLogout() {
-  localStorage.clear();
+  localStorage.removeItem("cardiox_token");
+  localStorage.removeItem("cardiox_role");
+  localStorage.removeItem("cardiox_username");
   window.location.replace("login.html");
 }
-// Reset form back to "Create clinician format"
-function resetForm() {
-  editingClinicianId.value = "";
-  usernameOfClinician.value = "";
-  passwordOfClinician.value = "";
-  firstNameOfClinician.value = "";
-  lastNameOfClinician.value = "";
-  usernameOfClinician.disabled = false;
-  passwordOfClinician.placeholder = "Only needed for NEW clinician";
+
+function setStatus(msg, isError = false) {
+  if (!adminStatus) return;
+  adminStatus.textContent = msg;
+  adminStatus.style.color = isError ? "#dc2626" : "#475569";
+}
+
+function formatRole(role) {
+  const map = {
+    admin: "Admin",
+    manager: "Manager",
+    employee: "Employee",
+    it_technician: "IT Technician",
+    clinician: "Clinician"
+  };
+  return map[role] || role || "—";
+}
+
+function formatStatus(status) {
+  if (!status) return "—";
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+function formatAuditAction(action) {
+  const map = {
+    approve_user: "Approved User",
+    deny_user: "Denied User",
+    update_user: "Updated User",
+    delete_user: "Deleted User",
+    create_clinician: "Created Clinician"
+  };
+  return map[action] || action || "—";
+}
+
+function formatDateTime(iso) {
+  if (!iso) return "—";
+  const dt = iso.replace("T", " ").slice(0, 19);
+  const [datePart, timePart] = dt.split(" ");
+  if (!datePart) return iso;
+  const [year, month, day] = datePart.split("-");
+  return `${day}/${month}/${year}${timePart ? ` ${timePart}` : ""}`;
+}
+
+function renderStatusPill(status) {
+  const value = (status || "").toLowerCase();
+
+  let cls = "status-pill-default";
+  if (value === "approved") cls = "status-pill-approved";
+  else if (value === "pending") cls = "status-pill-pending";
+  else if (value === "rejected" || value === "denied") cls = "status-pill-rejected";
+
+  return `<span class="status-pill ${cls}">${formatStatus(status)}</span>`;
+}
+
+function showEditUser(user) {
+  if (!editUserSection) return;
+
+  editUserSection.style.display = "block";
+  editingUserId.value = user.id;
+  editUserFirstName.value = user.first_name || "";
+  editUserLastName.value = user.last_name || "";
+  editUserRole.value = user.role || "employee";
+  editUserDepartment.value = user.department || "";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function hideEditUser() {
+  if (!editUserSection) return;
+
+  editUserSection.style.display = "none";
+  editingUserId.value = "";
+  editUserFirstName.value = "";
+  editUserLastName.value = "";
+  editUserRole.value = "employee";
+  editUserDepartment.value = "";
   setStatus("");
 }
-// Render clinicians list with Edit / Delete buttons
-function renderClinicians(items) {
+
+function renderUsers(items) {
+  if (!userTableBody) return;
+
+  cachedUsers = items || [];
+
   if (!items || items.length === 0) {
-    clinicianListEl.innerHTML = `<p class="note">No clinicians found.</p>`;
+    userTableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="empty-cell">No users found.</td>
+      </tr>
+    `;
     return;
   }
 
-  clinicianListEl.innerHTML = items.map(c => {
-    const when = c.created_at ? c.created_at.replace("T", " ").slice(0, 19) : "—";
-    const full = `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim() || c.username;
-    const cid = c.clinician_uid ?? "—";
-    return `
-      <div class="history-item" style="grid-template-columns: 1fr auto auto;">
-        <div class="history-meta">
-          <strong>${full}</strong><br/>
-          Clinician ID: ${cid} • Username: ${c.username} • ${when}
+  userTableBody.innerHTML = items.map(user => `
+    <tr>
+      <td>
+        <span class="admin-cell-strong">${user.username || "—"}</span>
+      </td>
+      <td>
+        <span class="admin-cell-strong">${(user.first_name || "")} ${(user.last_name || "")}</span>
+        <span class="admin-cell-subtext">${user.email || "No email provided"}</span>
+      </td>
+      <td>${formatRole(user.role)}</td>
+      <td>${user.department || "—"}</td>
+      <td>${renderStatusPill(user.approval_status)}</td>
+      <td>
+        <div class="admin-actions">
+          <button type="button" class="action-btn action-btn-edit" data-edit-user="${user.id}">Edit</button>
+          <button type="button" class="action-btn action-btn-delete" data-delete-user="${user.id}">Delete</button>
         </div>
-        <button class="secondary" data-edit="${c.id}">Edit</button>
-        <button class="secondary" data-del="${c.id}">Delete</button>
-      </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function renderPendingUsers(items) {
+  if (!pendingTableBody) return;
+
+  if (!items || items.length === 0) {
+    pendingTableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="empty-cell">No pending requests found.</td>
+      </tr>
     `;
-  }).join("");
+    return;
+  }
 
-// Editing clinician -> Only the name can be edited
-  document.querySelectorAll("[data-edit]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const id = btn.getAttribute("data-edit");
-      const c = items.find(x => String(x.id) === String(id));
-      if (!c) return;
+  pendingTableBody.innerHTML = items.map(user => `
+    <tr>
+      <td>
+        <span class="admin-cell-strong">${user.username || "—"}</span>
+      </td>
+      <td>
+        <span class="admin-cell-strong">${(user.first_name || "")} ${(user.last_name || "")}</span>
+      </td>
+      <td>${user.email || "—"}</td>
+      <td>${user.department || "—"}</td>
+      <td>${renderStatusPill(user.approval_status)}</td>
+      <td>
+        <select class="pending-role-select" data-approve-role="${user.id}">
+          <option value="clinician">Clinician</option>
+          <option value="manager">Manager</option>
+          <option value="employee">Employee</option>
+          <option value="it_technician">IT Technician</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button type="button" class="action-btn action-btn-approve" data-approve-user="${user.id}">Approve</button>
+      </td>
+      <td>
+        <textarea class="pending-deny-textarea" data-deny-reason="${user.id}" rows="2" placeholder="Reason for denial"></textarea>
+        <button type="button" class="action-btn action-btn-deny" data-deny-user="${user.id}">Deny</button>
+      </td>
+    </tr>
+  `).join("");
+}
 
-      editingClinicianId.value = c.id;
-      usernameOfClinician.value = c.username;
-      usernameOfClinician.disabled = true; 
-      firstNameOfClinician.value = c.first_name || "";
-      lastNameOfClinician.value = c.last_name || "";
-      passwordOfClinician.value = "";
-      passwordOfClinician.placeholder = "Password unchanged (not editable here)";
+function renderAuditLogs(items) {
+  if (!auditTableBody) return;
 
-      setStatus(`Editing clinician #${c.id} (${c.clinician_uid})`);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+  if (!items || items.length === 0) {
+    auditTableBody.innerHTML = `
+      <tr>
+        <td colspan="5" class="empty-cell">No audit logs found.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  auditTableBody.innerHTML = items.map(log => `
+    <tr>
+      <td>${formatDateTime(log.created_at)}</td>
+      <td>
+        <span class="admin-cell-strong">${log.actor_username || "—"}</span>
+      </td>
+      <td>${formatAuditAction(log.action)}</td>
+      <td>${log.target_username || "—"}</td>
+      <td class="audit-details-cell">${log.details || "—"}</td>
+    </tr>
+  `).join("");
+}
+
+async function loadUsers() {
+  if (userTableBody) {
+    userTableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="empty-cell">Loading users...</td>
+      </tr>
+    `;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/users`, {
+      headers: authHeaders()
     });
-  });
-// Deleting a clinician's account
-  document.querySelectorAll("[data-del]").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.getAttribute("data-del");
-      const ok = confirm("Delete this clinician?");
-      if (!ok) return;
 
-      const res = await fetch(`${API_BASE}/admin/clinicians/${id}`, {
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 401 || res.status === 403) return forceLogout();
+    if (!res.ok) {
+      userTableBody.innerHTML = `
+        <tr>
+          <td colspan="6" class="empty-cell">Failed to load users.</td>
+        </tr>
+      `;
+      return setStatus(data.detail || "Failed to load users.", true);
+    }
+
+    renderUsers(data);
+  } catch (err) {
+    userTableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="empty-cell">Network error while loading users.</td>
+      </tr>
+    `;
+    setStatus("Network error while loading users.", true);
+  }
+}
+
+async function loadPendingUsers() {
+  if (pendingTableBody) {
+    pendingTableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="empty-cell">Loading pending requests...</td>
+      </tr>
+    `;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/pending-users`, {
+      headers: authHeaders()
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 401 || res.status === 403) return forceLogout();
+    if (!res.ok) {
+      pendingTableBody.innerHTML = `
+        <tr>
+          <td colspan="7" class="empty-cell">Failed to load pending requests.</td>
+        </tr>
+      `;
+      return setStatus(data.detail || "Failed to load pending requests.", true);
+    }
+
+    renderPendingUsers(data);
+  } catch (err) {
+    pendingTableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="empty-cell">Network error while loading pending requests.</td>
+      </tr>
+    `;
+    setStatus("Network error while loading pending requests.", true);
+  }
+}
+
+async function loadAuditLogs() {
+  if (auditTableBody) {
+    auditTableBody.innerHTML = `
+      <tr>
+        <td colspan="5" class="empty-cell">Loading audit logs...</td>
+      </tr>
+    `;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/audit-logs?limit=100`, {
+      headers: authHeaders()
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 401 || res.status === 403) return forceLogout();
+    if (!res.ok) {
+      auditTableBody.innerHTML = `
+        <tr>
+          <td colspan="5" class="empty-cell">Failed to load audit logs.</td>
+        </tr>
+      `;
+      return setStatus(data.detail || "Failed to load audit logs.", true);
+    }
+
+    renderAuditLogs(data);
+  } catch (err) {
+    auditTableBody.innerHTML = `
+      <tr>
+        <td colspan="5" class="empty-cell">Network error while loading audit logs.</td>
+      </tr>
+    `;
+    setStatus("Network error while loading audit logs.", true);
+  }
+}
+
+userTableBody?.addEventListener("click", async (e) => {
+  const editBtn = e.target.closest("[data-edit-user]");
+  const deleteBtn = e.target.closest("[data-delete-user]");
+
+  if (editBtn) {
+    const id = editBtn.getAttribute("data-edit-user");
+    const user = cachedUsers.find(u => String(u.id) === String(id));
+    if (!user) return;
+    showEditUser(user);
+    return;
+  }
+
+  if (deleteBtn) {
+    const id = deleteBtn.getAttribute("data-delete-user");
+    const ok = confirm("Delete this user? They will no longer be able to login.");
+    if (!ok) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/admin/users/${id}`, {
         method: "DELETE",
         headers: authHeaders()
       });
 
       const data = await res.json().catch(() => ({}));
+
       if (res.status === 401 || res.status === 403) return forceLogout();
       if (!res.ok) return setStatus(data.detail || "Delete failed.", true);
 
-      setStatus("Clinician deleted.");
-      await loadClinicians();
-      resetForm();
-    });
-  });
-}
+      setStatus("User deleted.");
+      await loadUsers();
+      await loadPendingUsers();
+      await loadAuditLogs();
+      hideEditUser();
+    } catch (err) {
+      setStatus("Network error while deleting user.", true);
+    }
+  }
+});
 
-//Fetching all the clinicians from the backend
-async function loadClinicians() {
-  setStatus("Loading clinicians...");
-  const res = await fetch(`${API_BASE}/admin/clinicians`, { headers: authHeaders() });
-  if (res.status === 401 || res.status === 403) return forceLogout();
-  const items = await res.json();
-  renderClinicians(items);
-  setStatus("Clinicians loaded.");
-}
+pendingTableBody?.addEventListener("click", async (e) => {
+  const approveBtn = e.target.closest("[data-approve-user]");
+  const denyBtn = e.target.closest("[data-deny-user]");
 
-// Form will be submitted _> A new clinician created or an existing clinician name is updated
-form?.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  if (approveBtn) {
+    const id = approveBtn.getAttribute("data-approve-user");
+    const roleSelect = document.querySelector(`[data-approve-role="${id}"]`);
+    const role = roleSelect ? roleSelect.value : "clinician";
 
-  const isEdit = !!editingClinicianId.value;
-  const first_name = firstNameOfClinician.value.trim();
-  const last_name = lastNameOfClinician.value.trim();
+    try {
+      const res = await fetch(`${API_BASE}/admin/pending-users/${id}/approve`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ role })
+      });
 
-  if (!first_name || !last_name) {
-    setStatus("First name and Last name are required.", true);
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 401 || res.status === 403) return forceLogout();
+      if (!res.ok) return setStatus(data.detail || "Approval failed.", true);
+
+      setStatus("User approved.");
+      await loadUsers();
+      await loadPendingUsers();
+      await loadAuditLogs();
+    } catch (err) {
+      setStatus("Network error while approving user.", true);
+    }
     return;
   }
 
-  if (!isEdit) {
-    // CREATE clinician
-    const username = usernameOfClinician.value.trim();
-    const password = passwordOfClinician.value;
+  if (denyBtn) {
+    const id = denyBtn.getAttribute("data-deny-user");
+    const reasonBox = document.querySelector(`[data-deny-reason="${id}"]`);
+    const reason = reasonBox ? reasonBox.value.trim() : "";
 
-    if (!username || !password) {
-      setStatus("The Username and password are required for a new clinician.", true);
+    if (!reason) {
+      setStatus("Please provide a reason for denial.", true);
       return;
     }
 
-    setStatus("Creating the clinician...");
-    const res = await fetch(`${API_BASE}/admin/clinicians`, {
-      method: "POST",
+    try {
+      const res = await fetch(`${API_BASE}/admin/pending-users/${id}/deny`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ reason })
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 401 || res.status === 403) return forceLogout();
+      if (!res.ok) return setStatus(data.detail || "Denial failed.", true);
+
+      setStatus("Request denied.");
+      await loadPendingUsers();
+      await loadAuditLogs();
+    } catch (err) {
+      setStatus("Network error while denying user.", true);
+    }
+  }
+});
+
+editUserForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const id = editingUserId.value;
+  if (!id) return;
+
+  const payload = {
+    first_name: editUserFirstName.value.trim(),
+    last_name: editUserLastName.value.trim(),
+    role: editUserRole.value,
+    department: editUserDepartment.value.trim()
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/users/${id}`, {
+      method: "PUT",
       headers: authHeaders(),
-      body: JSON.stringify({ username, password, first_name, last_name })
+      body: JSON.stringify(payload)
     });
 
     const data = await res.json().catch(() => ({}));
+
     if (res.status === 401 || res.status === 403) return forceLogout();
-    if (!res.ok) return setStatus(data.detail || "Create failed.", true);
+    if (!res.ok) return setStatus(data.detail || "Update failed.", true);
 
-    setStatus(`Clinician has been created: ${data.first_name} ${data.last_name} (${data.clinician_uid})`);
-    await loadClinicians();
-    resetForm();
-    return;
+    setStatus("User updated.");
+    await loadUsers();
+    await loadAuditLogs();
+    hideEditUser();
+  } catch (err) {
+    setStatus("Network error while updating user.", true);
   }
-
-  // UPDATE clinician (name only)
-  const id = editingClinicianId.value;
-  setStatus("Updating the clinician...");
-
-  const res = await fetch(`${API_BASE}/admin/clinicians/${id}`, {
-    method: "PUT",
-    headers: authHeaders(),
-    body: JSON.stringify({ first_name, last_name })
-  });
-
-  const data = await res.json().catch(() => ({}));
-  if (res.status === 401 || res.status === 403) return forceLogout();
-  if (!res.ok) return setStatus(data.detail || "Update has failed.", true);
-
-  setStatus("Clinician has been updated.");
-  await loadClinicians();
-  resetForm();
 });
 
-btnCancelEdit?.addEventListener("click", resetForm);
-btnRefresh?.addEventListener("click", loadClinicians);
-btnLogout?.addEventListener("click", forceLogout);
+btnCancelUserEdit?.addEventListener("click", hideEditUser);
+btnRefreshUsers?.addEventListener("click", loadUsers);
+btnRefreshPending?.addEventListener("click", loadPendingUsers);
+btnRefreshAudit?.addEventListener("click", loadAuditLogs);
 
-loadClinicians();
+document.addEventListener("DOMContentLoaded", () => {
+  loadUsers();
+  loadPendingUsers();
+  loadAuditLogs();
+});

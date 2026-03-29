@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>CardioX Clinician Dashboard</title>
   <link rel="stylesheet" href="assets/styles.css" />
+  <script src="assets/session.js"></script>
   <script>
     const role = localStorage.getItem("cardiox_role");
     if (!localStorage.getItem("cardiox_token") || role !== "clinician") {
@@ -12,93 +13,233 @@
     }
   </script>
 </head>
+
 <body>
-  <div class="container">
-    <header class="header">
-      <h1 id="welcomeTitle">Clinician Dashboard</h1>
-      <p>Manage patients, then start a clinical assessment.</p>
-      <div class="actions">
-        <button id="btnLogout" type="button" class="secondary">Log out</button>
+ <div id="navbarContainer"></div>
+<script src="assets/navbar.js"></script>
+
+  <div class="container clinician-dashboard-container">
+    <header class="header app-page-header dashboard-hero">
+      <div class="dashboard-hero-text">
+        <h1 id="welcomeTitle">Clinician Dashboard</h1>
+        <p>Manage patient records, review history, and begin structured cardiovascular assessment.</p>
       </div>
     </header>
 
-        <!-- Adding a new patient -->
-    <section class="card">
-      <h2>Add New Patient</h2>
-      <form id="addPatientForm" class="form-grid" style="max-width:720px;">
-        <label>First Name <input id="firstNameOfNewPatient" type="text" required /></label>
-        <label>Last Name <input id="lastNameOfNewPatient" type="text" required /></label>
-        <label>DOB <input id="dateOfBirthOfNewPatient" type="date" required /></label>
-        <label>Sex
-          <select id="sexOfNewPatient" required>
-            <option value="">Select…</option>
-            <option>Male</option>
-            <option>Female</option>
-          </select>
-        </label>
-        <button type="submit" class="primary">Create Patient</button>
-        <p id="addPatientStatus" class="status"></p>
-      </form>
-    </section>
+    <section class="dashboard-stats-grid">
+      <div class="card stat-card glass-accent">
+        <div class="stat-label">Patient Records</div>
+        <div class="stat-value">Live Table</div>
+        <div class="stat-note">Browse and search existing patient records quickly.</div>
+      </div>
 
-        <!-- Searching for patients -->
-    <section class="card">
-      <h2>Search Patient</h2>
-      <form id="searchForm" class="form-grid" style="max-width:520px;">
-        <label>Patient ID or Name
-          <input id="searchQuery" type="text" placeholder="e.g. P-20260125-6480 or Aisha" required />
-        </label>
-        <button type="submit" class="primary">Search</button>
-        <p id="status" class="status"></p>
-      </form>
+      <div class="card stat-card glass-accent">
+        <div class="stat-label">Selected Patient</div>
+        <div class="stat-value" id="selectedPatientBadge">None</div>
+        <div class="stat-note">Choose a patient from the table to begin assessment.</div>
+      </div>
 
-      <div id="searchResults" class="history">
-        <p class="note">No results yet.</p>
+      <div class="card stat-card glass-accent">
+        <div class="stat-label">Assessment Workflow</div>
+        <div class="stat-value">Ready</div>
+        <div class="stat-note">Launch clinical assessment from the selected patient panel.</div>
       </div>
     </section>
 
-        <!-- Selecting a patient -->
-    <section class="card">
-      <h2>Selected Patient</h2>
-      <div id="patientDetails">
-        <p class="note">No patient selected yet.</p>
+    <section class="dashboard-main-grid">
+      <div class="dashboard-main-left">
+
+        <section class="card dashboard-card">
+          <div class="section-header-row">
+            <div>
+              <h2>Patient Records</h2>
+              <p class="section-subtext">Search by patient ID, first name, or last name. Click a row to select a patient.</p>
+            </div>
+          </div>
+
+          <form id="searchForm" class="dashboard-search-form">
+            <div class="dashboard-search-row">
+              <label class="search-grow">
+                Search Patients
+                <input id="searchQuery" type="text" placeholder="e.g. P-20260125-6480 or Aisha" />
+              </label>
+
+              <div class="actions dashboard-search-actions">
+                <button type="submit" class="primary">Search</button>
+                <button id="btnLoadAllPatients" type="button" class="secondary">Show All Patients</button>
+              </div>
+            </div>
+
+            <p id="status" class="status"></p>
+          </form>
+
+          <div id="patientTableWrapper" class="table-wrapper">
+            <table class="patient-table">
+              <thead>
+                <tr>
+                  <th>Patient ID</th>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>DOB</th>
+                  <th>Sex</th>
+                </tr>
+              </thead>
+              <tbody id="patientTableBody">
+                <tr>
+                  <td colspan="5" class="empty-cell">No patients loaded yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div id="noResultsBox" class="no-results-box" style="display:none;">
+            <p class="note">No matching patients found.</p>
+            <button id="btnQuickAddPatient" type="button" class="primary">Add New Patient</button>
+          </div>
+        </section>
+
+        <section class="card dashboard-card">
+          <div class="section-header-row">
+            <div>
+              <h2>Add New Patient</h2>
+              <p class="section-subtext">Create a new patient record to begin the assessment workflow.</p>
+            </div>
+          </div>
+
+          <form id="addPatientForm" class="form-grid dashboard-form-grid" novalidate>
+            <label>
+              First Name
+              <input id="firstNameOfNewPatient" type="text" required />
+            </label>
+
+            <label>
+              Last Name
+              <input id="lastNameOfNewPatient" type="text" required />
+            </label>
+
+            <label>
+              DOB
+              <input id="dateOfBirthOfNewPatient" type="date" required />
+            </label>
+
+            <label>
+              Sex
+              <select id="sexOfNewPatient" required>
+                <option value="">Select…</option>
+                <option>Male</option>
+                <option>Female</option>
+              </select>
+            </label>
+
+            <button type="submit" class="primary">Create Patient</button>
+            <p id="addPatientStatus" class="status"></p>
+          </form>
+        </section>
+
       </div>
 
-      <div class="actions">
-        <button id="btnStartAssessment" type="button" class="primary" disabled>
-          Start Clinical Assessment
-        </button>
-      </div>
+      <aside class="dashboard-main-right">
 
-      <p class="note">Select a patient to begin assessment.</p>
-    </section>
+        <section class="card dashboard-card sticky-panel">
+          <div class="section-header-row">
+            <div>
+              <h2>Selected Patient</h2>
+              <p class="section-subtext">Review the selected patient and continue into the assessment workflow.</p>
+            </div>
+          </div>
 
-    <section class="card" id="assessmentHistorySection" style="display:none;">
-      <h2>Assessment History</h2>
-      <div id="assessmentHistory" class="history">
-        <p class="note">No assessments loaded.</p>
-      </div>
-    </section>
-    <!-- Editing a patient's record -->
-    <section class="card" id="editPatientSection" style="display:none;">
-      <h2>Edit Patient</h2>
-      <form id="editPatientForm" class="form-grid" style="max-width:720px;">
-        <label>First Name <input id="editFirstName" type="text" required /></label>
-        <label>Last Name <input id="editLastName" type="text" required /></label>
-        <label>DOB <input id="editDob" type="date" required /></label>
-        <label>Sex
-          <select id="editSex" required>
-            <option value="">Select…</option>
-            <option>Male</option>
-            <option>Female</option>
-          </select>
-        </label>
+          <div id="patientDetails" class="selected-patient-panel">
+            <p class="note">No patient selected yet.</p>
+          </div>
 
-        <button type="submit" class="primary">Save Changes</button>
-        <p id="editPatientStatus" class="status"></p>
-      </form>
+          <div class="actions selected-patient-actions">
+            <button id="btnStartAssessment" type="button" class="primary" disabled>
+              Start Clinical Assessment
+            </button>
+          </div>
+
+          <p class="patient-side-note">Select a patient from the records table to enable assessment.</p>
+        </section>
+
+        <section class="card dashboard-card" id="assessmentHistorySection" style="display:none;">
+          <div class="section-header-row">
+            <div>
+              <h2>Assessment History</h2>
+              <p class="section-subtext">Previous assessments for the selected patient.</p>
+            </div>
+          </div>
+
+          <div id="assessmentHistory" class="history assessment-history-list">
+            <p class="note">No assessments loaded.</p>
+          </div>
+        </section>
+
+        <section class="card dashboard-card edit-patient-card" id="editPatientSection" style="display:none;">
+          <div class="section-header-row">
+            <div>
+              <h2>Edit Patient</h2>
+              <p class="section-subtext">Update the selected patient’s record details.</p>
+            </div>
+          </div>
+
+          <form id="editPatientForm" class="form-grid dashboard-form-grid">
+            <label>
+              First Name
+              <input id="editFirstName" type="text" required />
+            </label>
+
+            <label>
+              Last Name
+              <input id="editLastName" type="text" required />
+            </label>
+
+            <label>
+              DOB
+              <input id="editDob" type="date" required />
+            </label>
+
+            <label>
+              Sex
+              <select id="editSex" required>
+                <option value="">Select…</option>
+                <option>Male</option>
+                <option>Female</option>
+              </select>
+            </label>
+
+            <button type="submit" class="primary">Save Changes</button>
+            <p id="editPatientStatus" class="status"></p>
+          </form>
+        </section>
+
+      </aside>
     </section>
   </div>
+
+  <footer class="public-footer">
+  <div class="footer-container">
+    <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
+    <p>
+      Designed for hospitals, NHS settings, healthcare professionals, and
+      cardiology-focused clinical workflows.
+    </p>
+  </div>
+</footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = localStorage.getItem("cardiox_username") || "User";
+      const navUserText = document.getElementById("navUserText");
+      if (navUserText) navUserText.textContent = username;
+
+      const btnLogout = document.getElementById("btnLogout");
+      if (btnLogout) {
+        btnLogout.addEventListener("click", () => {
+          logoutUser();
+        });
+      }
+    });
+  </script>
 
   <script src="assets/clinician.js" defer></script>
 </body>

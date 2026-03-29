@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About CardioX | Cardiovascular Decision Support</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+
+  <div id="navbarContainer"></div>
+  <script src="assets/navbar.js"></script>
+
+  <main class="public-page about-page">
+
+    <section class="page-hero about-hero">
+      <div class="hero-content">
+
+        <div class="card page-hero-card about-hero-card">
+          <span class="hero-badge">About CardioX</span>
+          <h1>Built to support clearer, safer, and more usable cardiovascular risk assessment.</h1>
+          <p>
+            CardioX is a clinician-facing cardiovascular decision support platform designed for hospitals,
+            NHS settings, healthcare professionals, and cardiology teams. It combines structured patient
+            assessment, probability-based risk prediction, interpretable outputs, and workflow-focused design
+            to support more confident clinical review.
+          </p>
+
+          <div class="about-hero-stats">
+            <div class="about-stat">
+              <strong>Clinical workflow</strong>
+              <span>Designed for structured review and follow-up</span>
+            </div>
+            <div class="about-stat">
+              <strong>Interpretable output</strong>
+              <span>Risk percentage, bands, and supporting insight</span>
+            </div>
+            <div class="about-stat">
+              <strong>Professional use</strong>
+              <span>Aligned to healthcare-focused usability principles</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-image-card">
+          <img
+            src="assets/images/about-clinician-review.jpg"
+            alt="Clinician reviewing cardiovascular data"
+            class="hero-main-image"
+          />
+        </div>
+
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Our Positioning</span>
+        <h2>What CardioX is</h2>
+        <p>
+          CardioX is designed as a modern digital health platform concept focused on making cardiovascular
+          risk assessment more usable, transparent, and clinically practical.
+        </p>
+      </div>
+
+      <div class="card info-card-wide about-wide-card">
+        <p>
+          CardioX has been created to show how machine learning can be integrated into a professional
+          healthcare workflow through a clean web interface, structured patient assessment, and clear
+          presentation of risk outputs. The platform is centred on usability, professional trust, and
+          responsible clinical support rather than opaque or hard-to-interpret outputs.
+        </p>
+
+        <p>
+          Instead of positioning AI as a replacement for clinical expertise, CardioX is designed to support
+          healthcare professionals by making risk information easier to interpret, review, document, and
+          communicate. The overall aim is to provide a more practical digital experience for cardiovascular
+          decision support in real clinical environments.
+        </p>
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Why It Matters</span>
+        <h2>Why CardioX was created</h2>
+      </div>
+
+      <div class="info-grid two-column-grid">
+        <div class="card info-card about-feature-card">
+          <div class="info-icon">01</div>
+          <h3>The challenge</h3>
+          <p>
+            Many traditional cardiovascular risk tools deliver a final score but provide limited visual
+            clarity, limited workflow support, and limited insight into how results should be interpreted
+            during day-to-day clinical use.
+          </p>
+        </div>
+
+        <div class="card info-card about-feature-card">
+          <div class="info-icon">02</div>
+          <h3>The response</h3>
+          <p>
+            CardioX was designed to present AI-supported cardiovascular risk assessment in a way that feels
+            more operational, more transparent, and more aligned with the needs of healthcare professionals,
+            cardiology teams, and structured hospital workflows.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">How The Platform Works</span>
+        <h2>A structured end-to-end assessment workflow</h2>
+      </div>
+
+      <div class="info-grid">
+        <div class="card info-card about-feature-card">
+          <div class="info-icon">IN</div>
+          <h3>Structured clinical input</h3>
+          <p>
+            Clinicians enter relevant cardiovascular attributes such as age, chest pain type, cholesterol,
+            blood pressure, and other structured clinical factors used within the assessment workflow.
+          </p>
+        </div>
+
+        <div class="card info-card about-feature-card">
+          <div class="info-icon">AI</div>
+          <h3>Probability-based risk prediction</h3>
+          <p>
+            CardioX uses a machine learning model to estimate heart attack risk as a probability score,
+            which is then presented as both a percentage and a risk band for faster and clearer review.
+          </p>
+        </div>
+
+        <div class="card info-card about-feature-card">
+          <div class="info-icon">REV</div>
+          <h3>Clinical review and reporting</h3>
+          <p>
+            The platform supports assessment history, trend review, personalised guidance, and report export
+            so that outputs can be reviewed and documented in a more structured and practical way.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Technology Foundation</span>
+        <h2>Dataset and model information</h2>
+      </div>
+
+      <div class="card info-card-wide about-wide-card">
+        <p>
+          CardioX uses a <strong>UCI Cleveland-style heart disease dataset</strong> as the basis for model
+          development and experimentation. This dataset includes structured cardiovascular variables commonly
+          used in heart disease prediction research and supports the development of consistent probability-based
+          risk assessment logic.
+        </p>
+
+        <p>
+          The deployed prediction model in the current system is a <strong>Random Forest</strong> classifier.
+          This model was selected because it provides strong performance for probability-based risk prediction
+          while supporting the wider goal of delivering a practical and clinically reviewable decision support
+          experience.
+        </p>
+
+        <p>
+          Application workflow records and supporting data operations are managed using <strong>SQLite</strong>,
+          providing lightweight persistence suitable for the current implementation while maintaining a clear
+          pathway for future architecture expansion.
+        </p>
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Core Principles</span>
+        <h2>The values behind CardioX</h2>
+      </div>
+
+      <div class="info-grid">
+        <div class="card info-card about-feature-card">
+          <div class="info-icon">UX</div>
+          <h3>Usability</h3>
+          <p>
+            The interface is designed to reduce friction, improve readability, and support efficient clinical
+            workflows through clear forms, structured cards, and focused navigation.
+          </p>
+        </div>
+
+        <div class="card info-card about-feature-card">
+          <div class="info-icon">TR</div>
+          <h3>Transparency</h3>
+          <p>
+            CardioX aims to make machine learning outputs easier to interpret through risk bands, clear
+            presentation, and explainability-focused design choices.
+          </p>
+        </div>
+
+        <div class="card info-card about-feature-card">
+          <div class="info-icon">RAI</div>
+          <h3>Responsible AI use</h3>
+          <p>
+            The platform is intended to support professional review and should be used with appropriate
+            clinical judgement, governance, and healthcare oversight.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Clinical Use Notice</span>
+        <h2>Important notice</h2>
+      </div>
+
+      <div class="card notice-card">
+        <p>
+          CardioX is intended to support cardiovascular risk review and clinical decision-making. It is not
+          designed to replace clinician judgement, diagnosis, or treatment planning, and should be used within
+          appropriate professional governance and healthcare oversight.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="public-footer">
+    <div class="footer-container">
+      <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
+      <p>Designed for hospitals, NHS settings, healthcare professionals, and cardiology-focused clinical workflows.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

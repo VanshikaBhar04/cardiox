@@ -5,181 +5,334 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>CardioX Assessment</title>
   <link rel="stylesheet" href="assets/styles.css" />
+  <script src="assets/session.js"></script>
+
   <script>
-    // Guard: must be logged in as clinician
     const role = localStorage.getItem("cardiox_role");
     if (!localStorage.getItem("cardiox_token") || role !== "clinician") {
       window.location.replace("login.html");
     }
   </script>
-</head>
-<body>
-  <div class="container">
-    <header class="header">
-      <h1 id="welcomeTitle">Clinical Assessment</h1>
-      <p>Review patient details, enter clinical attributes, and generate risk prediction.</p>
 
-      <div class="actions">
-        <button id="btnBack" type="button" class="secondary">Back to Dashboard</button>
-        <button id="btnLogout" type="button" class="secondary">Log out</button>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+</head>
+
+<body>
+
+<div id="navbarContainer"></div>
+<script src="assets/navbar.js"></script>
+
+  <main class="container assessment-classic-container">
+    <header class="header app-page-header dashboard-hero">
+      <div class="dashboard-hero-text">
+        <h1 id="welcomeTitle">Clinical Assessment</h1>
+        <p>
+          Review the selected patient, enter structured clinical variables, generate a cardiovascular
+          risk estimate, inspect explainability, and export a professional report.
+        </p>
       </div>
     </header>
 
-    <!-- Selected Patient Summary -->
-    <section class="card">
-      <h2>Patient Summary</h2>
-      <div id="patientSummary">
-        <p class="note">Loading patient...</p>
+    <section class="assessment-classic-grid">
+
+      <!-- LEFT COLUMN -->
+      <div class="assessment-left-column">
+
+        <section class="card assessment-card">
+          <div class="section-header-row">
+            <div>
+              <h2>Clinical Attributes</h2>
+              <p class="section-subtext">
+                Age and sex are automatically loaded from the patient record.
+              </p>
+            </div>
+          </div>
+
+          <div class="actions assessment-blue-actions">
+            <button id="btnLoadExample" type="button" class="primary">Load Example Values</button>
+            <button id="btnClear" type="button" class="primary">Clear Clinical Fields</button>
+          </div>
+
+          <form id="predictForm">
+            <div class="grid">
+              <label>
+                Age
+                <input name="age" type="number" min="1" max="120" required />
+              </label>
+
+              <label>
+                Sex
+                <select name="sex" required>
+                  <option value="">Select…</option>
+                  <option>Male</option>
+                  <option>Female</option>
+                </select>
+              </label>
+
+              <label>
+                Chest Pain (cp)
+                <select name="cp" required>
+                  <option value="">Select…</option>
+                  <option>typical angina</option>
+                  <option>atypical angina</option>
+                  <option>non-anginal</option>
+                  <option>asymptomatic</option>
+                </select>
+              </label>
+
+              <label>
+                Resting Blood Pressure (trestbps)
+                <input name="trestbps" type="number" min="50" max="250" />
+              </label>
+
+              <label>
+                Cholesterol (chol)
+                <input name="chol" type="number" min="50" max="800" />
+              </label>
+
+              <label>
+                Fasting Blood Sugar > 120 (fbs)
+                <select name="fbs" required>
+                  <option value="">Select…</option>
+                  <option>True</option>
+                  <option>False</option>
+                </select>
+              </label>
+
+              <label>
+                Rest ECG (restecg)
+                <select name="restecg" required>
+                  <option value="">Select…</option>
+                  <option>normal</option>
+                  <option>stt abnormality</option>
+                  <option>lv hypertrophy</option>
+                </select>
+              </label>
+
+              <label>
+                Max Heart Rate (thalch)
+                <input name="thalch" type="number" min="60" max="250" />
+              </label>
+
+              <label>
+                Exercise-Induced Angina (exang)
+                <select name="exang" required>
+                  <option value="">Select…</option>
+                  <option>True</option>
+                  <option>False</option>
+                </select>
+              </label>
+
+              <label>
+                Oldpeak
+                <input name="oldpeak" type="number" min="0" max="10" step="0.1" />
+              </label>
+
+              <label>
+                Slope
+                <select name="slope" required>
+                  <option value="">Select…</option>
+                  <option>upsloping</option>
+                  <option>flat</option>
+                  <option>downsloping</option>
+                </select>
+              </label>
+
+              <label>
+                CA
+                <input name="ca" type="number" min="0" max="3" />
+              </label>
+
+              <label>
+                Thal
+                <select name="thal" required>
+                  <option value="">Select…</option>
+                  <option>normal</option>
+                  <option>fixed defect</option>
+                  <option>reversable defect</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="actions assessment-blue-actions" style="margin-top:16px;">
+              <button id="btnGenerateAssessment" type="submit" class="primary">Generate Risk Assessment</button>
+              <button id="btnRecommendation" type="button" class="primary">Jump to Personalised Advice</button>
+            </div>
+
+            <p id="statusPredict" class="status" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section class="card assessment-card">
+          <div class="section-header-row">
+            <div>
+              <h2>Prediction Result</h2>
+              <p class="section-subtext">
+                Probability-based decision-support output.
+              </p>
+            </div>
+          </div>
+
+          <div class="result">
+            <div>
+              <div class="label">Estimated Risk</div>
+              <div id="percentageOfRisk" class="big">—</div>
+            </div>
+
+            <div>
+              <div class="label">Risk Band</div>
+              <div id="bandOfRisk" class="pill">—</div>
+            </div>
+          </div>
+
+          <p class="note">
+            CardioX supports clinician interpretation and does not replace professional judgement.
+          </p>
+        </section>
+
+        <section class="card assessment-card">
+          <div class="section-header-row">
+            <div>
+              <h2>Explainability (SHAP) — Top Risk Drivers</h2>
+              <p class="section-subtext">
+                Shows which patient factors most strongly influenced the model output.
+              </p>
+            </div>
+          </div>
+
+          <div class="shap-summary-banner">
+            <div class="shap-summary-title">Interpretation</div>
+            <p>
+              Red bars indicate variables that increased the predicted risk, while green bars indicate
+              variables that reduced it.
+            </p>
+          </div>
+
+          <div id="shapFactors" class="shap-driver-list">
+            <p class="note">Run a prediction to see the top risk drivers.</p>
+          </div>
+        </section>
+
+        <section class="card assessment-card" id="adviceSection">
+          <div class="section-header-row">
+            <div>
+              <h2>Personalised Advice</h2>
+              <p class="section-subtext">
+                Source-backed advice derived from the current assessment.
+              </p>
+            </div>
+          </div>
+
+          <div id="adviceList" class="advice-card-list">
+            <p class="note">Advice will appear after prediction.</p>
+          </div>
+        </section>
+
+        <section class="card assessment-card">
+          <div class="section-header-row">
+            <div>
+              <h2>Patient Trend vs Clinical Reference</h2>
+              <p class="section-subtext">
+                Compare values over time against a simple reference line.
+              </p>
+            </div>
+          </div>
+
+          <div class="trend-toolbar">
+            <label class="trend-metric-label">
+              Attribute
+              <select id="metricSelect">
+                <option value="trestbps">Resting BP (trestbps)</option>
+                <option value="chol">Cholesterol (chol)</option>
+                <option value="thalch">Max Heart Rate (thalch)</option>
+                <option value="oldpeak">Oldpeak</option>
+                <option value="ca">CA</option>
+                <option value="risk_percent">Predicted Risk</option>
+              </select>
+            </label>
+          </div>
+
+          <div id="trendSummary" class="trend-summary-card">
+            <p class="note">Trend summary will appear when assessment history is available.</p>
+          </div>
+
+          <div id="trendInterpretation" class="assessment-helper-text">
+            Select a metric to view a short interpretation.
+          </div>
+
+          <div class="trend-chart-wrap">
+            <canvas id="clinicalChart"></canvas>
+          </div>
+        </section>
+
       </div>
+
+      <!-- RIGHT COLUMN -->
+      <aside class="assessment-right-column">
+
+        <section class="card assessment-card sticky-panel">
+          <div class="section-header-row">
+            <div>
+              <h2>Selected Patient</h2>
+              <p class="section-subtext">Current patient for this assessment.</p>
+            </div>
+          </div>
+
+          <div id="patientSummary" class="selected-patient-green-card">
+            <p class="note">Loading patient...</p>
+          </div>
+
+          <div class="actions assessment-side-button-stack">
+            <button id="btnBack" type="button" class="primary">Back to Patient Management</button>
+            <button id="btnExportPatientReport" type="button" class="primary">Export Report for Patient</button>
+            <button id="btnExportClinicianReport" type="button" class="primary">Export Report for Clinician</button>
+          </div>
+
+          <p class="patient-side-note">
+            Reports use the currently selected assessment record.
+          </p>
+        </section>
+
+        <section class="card assessment-card">
+          <div class="section-header-row">
+            <div>
+              <h2>Assessment History</h2>
+              <p class="section-subtext">Open, edit, or delete previous saved assessments.</p>
+            </div>
+          </div>
+
+          <div id="assessmentHistory" class="history assessment-history-list">
+            <p class="note">Loading assessments…</p>
+          </div>
+        </section>
+
+      </aside>
+
     </section>
+  </main>
 
-
-    <!-- Clinical Attributes + Prediction -->
-    <section class="card">
-      <h2>Clinical Attributes</h2>
-      <p class="note">Age and Sex are auto-filled from the patient record.</p>
-
-      <div class="actions">
-        <button id="btnLoadExample" type="button">Load Example</button>
-        <button id="btnClear" type="button" class="secondary">Clear</button>
-      </div>
-
-      <form id="predictForm">
-        <div class="grid">
-          <label>
-            Age
-            <input name="age" type="number" min="1" max="120" required />
-          </label>
-
-          <label>
-            Sex
-            <select name="sex" required>
-              <option value="">Select…</option>
-              <option>Male</option>
-              <option>Female</option>
-            </select>
-          </label>
-
-          <label>
-            Chest Pain (cp)
-            <select name="cp" required>
-              <option value="">Select…</option>
-              <option>typical angina</option>
-              <option>atypical angina</option>
-              <option>non-anginal</option>
-              <option>asymptomatic</option>
-            </select>
-          </label>
-
-          <label>
-            Resting BP (trestbps)
-            <input name="trestbps" type="number" min="50" max="250" />
-          </label>
-
-          <label>
-            Cholesterol (chol)
-            <input name="chol" type="number" min="50" max="800" />
-          </label>
-
-          <label>
-            Fasting Blood Sugar > 120 (fbs)
-            <select name="fbs" required>
-              <option value="">Select…</option>
-              <option>True</option>
-              <option>False</option>
-            </select>
-          </label>
-
-          <label>
-            Rest ECG (restecg)
-            <select name="restecg" required>
-              <option value="">Select…</option>
-              <option>normal</option>
-              <option>stt abnormality</option>
-              <option>lv hypertrophy</option>
-            </select>
-          </label>
-
-          <label>
-            Max Heart Rate (thalch)
-            <input name="thalch" type="number" min="60" max="250" />
-          </label>
-
-          <label>
-            Exercise-induced Angina (exang)
-            <select name="exang" required>
-              <option value="">Select…</option>
-              <option>True</option>
-              <option>False</option>
-            </select>
-          </label>
-
-          <label>
-            Oldpeak
-            <input name="oldpeak" type="number" min="0" max="10" step="0.1" />
-          </label>
-
-          <label>
-            Slope
-            <select name="slope" required>
-              <option value="">Select…</option>
-              <option>upsloping</option>
-              <option>flat</option>
-              <option>downsloping</option>
-            </select>
-          </label>
-
-          <label>
-            CA
-            <input name="ca" type="number" min="0" max="3" />
-          </label>
-
-          <label>
-            Thal
-            <select name="thal" required>
-              <option value="">Select…</option>
-              <option>normal</option>
-              <option>fixed defect</option>
-              <option>reversable defect</option>
-            </select>
-          </label>
-        </div>
-
-        <div class="actions" style="margin-top:12px;">
-          <button type="submit" class="primary">Predict Risk</button>
-
-          <!-- buttons shown only (do not need to work yet) -->
-          <button id="btnRecommendation" type="button">Prevention Guideline / Recommendation</button>
-          <button id="btnExportReport" type="button" class="secondary">Export Report</button>
-        </div>
-
-        <p id="statusPredict" class="status" aria-live="polite"></p>
-      </form>
-    </section>
-
-    <!-- Prediction Result -->
-    <section class="card">
-      <h2>Prediction Result</h2>
-
-      <div class="result">
-        <div>
-          <div class="label">Estimated Risk</div>
-          <div id="percentageOfRisk" class="big">—</div>
-        </div>
-
-        <div>
-          <div class="label">Risk Band</div>
-          <div id="bandOfRisk" class="pill">—</div>
-        </div>
-      </div>
-
-      <p class="note">
-        This is a prototype decision-support indicator (probability-based), not a clinical diagnosis.
-      </p>
-    </section>
+  <footer class="public-footer">
+  <div class="footer-container">
+    <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
+    <p>
+      Designed for hospitals, NHS settings, healthcare professionals, and
+      cardiology-focused clinical workflows.
+    </p>
   </div>
+</footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = localStorage.getItem("cardiox_username") || "User";
+      const navUserText = document.getElementById("navUserText");
+      if (navUserText) navUserText.textContent = username;
+
+      document.getElementById("btnLogout")?.addEventListener("click", () => {
+        logoutUser();
+      });
+    });
+  </script>
 
   <script src="assets/assessment.js" defer></script>
 </body>
 </html>
- 

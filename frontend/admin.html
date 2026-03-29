@@ -5,66 +5,226 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>CardioX Admin Dashboard</title>
   <link rel="stylesheet" href="assets/styles.css" />
+  <script src="assets/session.js"></script>
   <script>
-    const role = localStorage.getItem("cardiox_role");
-    if (!token || role !== "admin") window.location.replace("login.html");
+    const sessionToken = localStorage.getItem("cardiox_token");
+    const sessionRole = localStorage.getItem("cardiox_role");
+    if (!sessionToken || sessionRole !== "admin") {
+      window.location.replace("login.html");
+    }
   </script>
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <h1>Admin Dashboard</h1>
-      <p>Manage clinician accounts.</p>
-      <div class="actions">
-        <button id="btnLogout" type="button" class="secondary">Log out</button>
+
+<div id="navbarContainer"></div>
+<script src="assets/navbar.js"></script>
+
+  <div class="container clinician-dashboard-container">
+    <header class="header app-page-header dashboard-hero">
+      <div class="dashboard-hero-text">
+        <h1>Admin Dashboard</h1>
+        <p>
+          Manage approved users, review pending access requests, and monitor recent audit activity
+          across the CardioX platform.
+        </p>
       </div>
     </header>
 
-    <section class="card">
-      <h2>Create / Update Clinician</h2>
-      <form id="createClinicianForm" class="form-grid" style="max-width:520px;">
-        <input id="editingClinicianId" type="hidden" />
+    <section class="dashboard-stats-grid admin-stats-grid">
+      <div class="card stat-card glass-accent">
+        <div class="stat-label">Current Users</div>
+        <div class="stat-value">Manage</div>
+        <div class="stat-note">Edit roles, departments, and remove access where needed.</div>
+      </div>
 
-        <label>Clinician Username
-          <input id="usernameOfClinician" type="text" required />
-        </label>
+      <div class="card stat-card glass-accent">
+        <div class="stat-label">Pending Requests</div>
+        <div class="stat-value">Review</div>
+        <div class="stat-note">Approve or deny sign-up requests with clear access control.</div>
+      </div>
 
-        <label>Clinician Password
-          <input id="passwordOfClinician" type="password" placeholder="Only needed for NEW clinician" />
-        </label>
+      <div class="card stat-card glass-accent">
+        <div class="stat-label">Audit Logs</div>
+        <div class="stat-value">Trace</div>
+        <div class="stat-note">Track important admin activity for accountability and oversight.</div>
+      </div>
+    </section>
 
-        <label>First Name
-          <input id="clinicianFirstName" type="text" required />
-        </label>
+    <div class="admin-sections-stack">
 
-        <label>Last Name
-          <input id="clinicianLastName" type="text" required />
-        </label>
+      <section class="card dashboard-card admin-section-card">
+        <div class="section-header-row admin-section-header">
+          <div>
+            <h2>Current Users</h2>
+            <p class="section-subtext">View and manage all approved users in the CardioX system.</p>
+          </div>
 
-        <div class="actions">
-          <button id="btnSubmitClinician" type="submit" class="primary">Save Clinician</button>
-          <button id="btnCancelEdit" type="button" class="secondary">Cancel Edit</button>
+          <div class="admin-toolbar">
+            <button id="btnRefreshUsers" type="button" class="primary admin-refresh-btn">Refresh Users</button>
+          </div>
         </div>
 
-        <p id="status" class="status"></p>
-      </form>
+        <div class="table-wrapper">
+          <table class="patient-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Department / Ward</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <tr>
+                <td colspan="6" class="empty-cell">No users loaded yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-      <p class="note">Clinician ID is auto-generated.</p>
-    </section>
+      <section class="card dashboard-card admin-section-card" id="editUserSection" style="display:none;">
+        <div class="section-header-row admin-section-header">
+          <div>
+            <h2>Edit User</h2>
+            <p class="section-subtext">Update the selected user’s name, role, and department details.</p>
+          </div>
+        </div>
 
-    <section class="card">
-      <h2>Clinicians</h2>
-      <div class="actions">
-        <button id="btnRefresh" type="button">Refresh the List</button>
-      </div>
+        <form id="editUserForm" class="form-grid dashboard-form-grid admin-edit-form">
+          <input id="editingUserId" type="hidden" />
 
-      <div id="clinicianList" class="history">
-        <p class="note">No clinicians loaded yet.</p>
-      </div>
-    </section>
+          <label>
+            First Name
+            <input id="editUserFirstName" type="text" required />
+          </label>
+
+          <label>
+            Last Name
+            <input id="editUserLastName" type="text" required />
+          </label>
+
+          <label>
+            Role
+            <select id="editUserRole" required>
+              <option value="admin">Admin</option>
+              <option value="manager">Manager</option>
+              <option value="employee">Employee</option>
+              <option value="it_technician">IT Technician</option>
+              <option value="clinician">Clinician</option>
+            </select>
+          </label>
+
+          <label>
+            Department / Ward
+            <input id="editUserDepartment" type="text" required />
+          </label>
+
+          <div class="actions admin-edit-actions">
+            <button type="submit" class="primary">Save Changes</button>
+            <button id="btnCancelUserEdit" type="button" class="secondary">Cancel</button>
+          </div>
+
+          <p id="adminStatus" class="status"></p>
+        </form>
+      </section>
+
+      <section class="card dashboard-card admin-section-card">
+        <div class="section-header-row admin-section-header">
+          <div>
+            <h2>Pending Approval Requests</h2>
+            <p class="section-subtext">Review new access requests and approve them into the system or deny them with a reason.</p>
+          </div>
+
+          <div class="admin-toolbar">
+            <button id="btnRefreshPending" type="button" class="primary admin-refresh-btn">Refresh Pending Requests</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="patient-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Status</th>
+                <th>Approve</th>
+                <th>Deny</th>
+              </tr>
+            </thead>
+            <tbody id="pendingTableBody">
+              <tr>
+                <td colspan="7" class="empty-cell">No pending requests loaded yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card dashboard-card admin-section-card">
+        <div class="section-header-row admin-section-header">
+          <div>
+            <h2>Audit Logs</h2>
+            <p class="section-subtext">Review recent administrative actions recorded by the system.</p>
+          </div>
+
+          <div class="admin-toolbar">
+            <button id="btnRefreshAudit" type="button" class="primary admin-refresh-btn">Refresh Audit Logs</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="patient-table">
+            <thead>
+              <tr>
+                <th>Date / Time</th>
+                <th>Admin</th>
+                <th>Action</th>
+                <th>Target User</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="auditTableBody">
+              <tr>
+                <td colspan="5" class="empty-cell">No audit logs loaded yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
   </div>
+
+  <footer class="public-footer">
+  <div class="footer-container">
+    <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
+    <p>
+      Designed for hospitals, NHS settings, healthcare professionals, and
+      cardiology-focused clinical workflows.
+    </p>
+  </div>
+</footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = localStorage.getItem("cardiox_username") || "User";
+      const navUserText = document.getElementById("navUserText");
+      if (navUserText) navUserText.textContent = username;
+
+      const btnLogout = document.getElementById("btnLogout");
+      if (btnLogout) {
+        btnLogout.addEventListener("click", () => {
+          logoutUser();
+        });
+      }
+    });
+  </script>
 
   <script src="assets/admin.js" defer></script>
 </body>
 </html>
-

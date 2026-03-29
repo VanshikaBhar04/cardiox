@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CardioX Help & Support</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <script src="assets/session.js"></script>
+  <script>
+    const role = localStorage.getItem("cardiox_role");
+    if (!localStorage.getItem("cardiox_token") || (role !== "clinician" && role !== "admin")) {
+      window.location.replace("login.html");
+    }
+  </script>
+</head>
+<body>
+
+<div id="navbarContainer"></div>
+<script src="assets/navbar.js"></script>
+
+  <main class="container support-page-container">
+
+    <section class="support-hero-section">
+      <div class="support-hero-card">
+        <span class="hero-badge">Guidance for First-Time Users</span>
+        <h1>Help & Support</h1>
+        <p>
+          Learn how to navigate CardioX confidently, understand the clinical workflow, and interpret
+          the structured assessment form in a clear and practical way.
+        </p>
+
+        <div class="support-hero-actions">
+          <a id="supportDashboardCta" href="clinician.html" class="btn-link primary-link">Go to Patient Management</a>
+          <a href="compliance.html" class="btn-link secondary-link">View Safety & Compliance</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="support-section-stack">
+
+      <section class="card support-wide-card">
+        <div class="section-header-row">
+          <div>
+            <h2>Quick Start Workflow</h2>
+            <p class="section-subtext">
+              CardioX is designed around a simple workflow so users can move efficiently from patient selection
+              to structured assessment and review.
+            </p>
+          </div>
+        </div>
+
+        <div class="support-steps-grid">
+          <div class="support-step-card">
+            <div class="support-step-badge">1</div>
+            <h3>Open the main workspace</h3>
+            <p>Go to the main dashboard and access the patient or user management area based on your role.</p>
+          </div>
+
+          <div class="support-step-card">
+            <div class="support-step-badge">2</div>
+            <h3>Find or create a patient</h3>
+            <p>Search the record table for an existing patient or add a new patient if no match exists.</p>
+          </div>
+
+          <div class="support-step-card">
+            <div class="support-step-badge">3</div>
+            <h3>Select the record</h3>
+            <p>Click a patient row to load their summary, edit form, and latest assessment history.</p>
+          </div>
+
+          <div class="support-step-card">
+            <div class="support-step-badge">4</div>
+            <h3>Begin assessment</h3>
+            <p>Open the structured clinical assessment form and enter the required values.</p>
+          </div>
+
+          <div class="support-step-card">
+            <div class="support-step-badge">5</div>
+            <h3>Review outputs</h3>
+            <p>Interpret the risk result, explainability, advice, and trend information together.</p>
+          </div>
+
+          <div class="support-step-card">
+            <div class="support-step-badge">6</div>
+            <h3>Export the report</h3>
+            <p>Generate a clinician-facing or patient-facing PDF depending on the use case.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card support-wide-card">
+        <div class="section-header-row">
+          <div>
+            <h2>How the Main Workflow Works</h2>
+            <p class="section-subtext">
+              These are the main parts of CardioX and how they fit together during normal use.
+            </p>
+          </div>
+        </div>
+
+        <div class="support-feature-grid">
+          <div class="support-feature-card">
+            <h3>Patient Search</h3>
+            <p>Use the patient table to search by patient ID, first name, or surname and quickly locate existing records.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>Add New Patient</h3>
+            <p>Create a new patient record when no match exists, keeping the workflow structured and continuous.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>Selected Patient Summary</h3>
+            <p>Once a patient is selected, CardioX displays a focused summary panel to reduce navigation friction.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>Assessment History</h3>
+            <p>Previous assessments help users compare outcomes over time and revisit older records when needed.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>Explainability</h3>
+            <p>SHAP top drivers show which variables most influenced the prediction for that individual assessment.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>Reporting</h3>
+            <p>Export reports in PDF format for structured review, documentation, or patient-friendly communication.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card support-wide-card">
+        <div class="section-header-row">
+          <div>
+            <h2>Assessment Form Guidance</h2>
+            <p class="section-subtext">
+              The clinician assessment form captures structured cardiovascular inputs used by the model.
+            </p>
+          </div>
+        </div>
+
+        <div class="metric-guide-grid">
+          <div class="metric-guide-card">
+            <h3>Age</h3>
+            <p>Automatically calculated from the patient’s date of birth and used as a core cardiovascular risk factor.</p>
+          </div>
+
+          <div class="metric-guide-card">
+            <h3>Sex</h3>
+            <p>Loaded from the patient record and used to reflect demographic differences in clinical risk patterns.</p>
+          </div>
+
+          <div class="metric-guide-card">
+            <h3>Chest Pain (cp)</h3>
+            <p>Represents the patient’s chest pain presentation, including typical angina, atypical angina, non-anginal pain, or asymptomatic presentation.</p>
+          </div>
+
+          <div class="metric-guide-card">
+            <h3>Resting Blood Pressure (trestbps)</h3>
+            <p>The patient’s resting systolic blood pressure. Higher values may contribute to increased cardiovascular risk.</p>
+          </div>
+
+          <div class="metric-guide-card">
+            <h3>Cholesterol (chol)</h3>
+            <p>Total cholesterol input used by the model. Elevated cholesterol may contribute to increased cardiovascular risk.</p>
+          </div>
+
+          <div class="metric-guide-card">
+            <h3>Fasting Blood Sugar (fbs)</h3>
+            <p>Indicates whether fasting blood sugar is greater than 120 mg/dL.</p>
+          </div>
+
+          <div class="metric-guide-card">
+            <h3>Rest ECG (restecg)</h3>
+            <p>Represents the resting electrocardiographic result and may reflect normal or abnormal cardiac activity.</p>
+          </div>
+
+          <div class="metric-guide-card">
+            <h3>Max Heart Rate (thalch)</h3>
+            <p>The maximum heart rate achieved during testing or clinical measurement.</p>
+          </div>
+
+          <div class="metric-guide-card">
+            <h3>Exercise-Induced Angina (exang)</h3>
+            <p>Indicates whether angina is triggered during exertion, which can be clinically significant for interpretation.</p>
+          </div>
+
+          <div class="metric-guide-card">
+            <h3>Oldpeak</h3>
+            <p>Represents ST depression induced by exercise relative to rest, often used in cardiovascular evaluation.</p>
+          </div>
+
+          <div class="metric-guide-card">
+            <h3>Slope</h3>
+            <p>Describes the slope of peak exercise ST segment and contributes to the model’s interpretation.</p>
+          </div>
+
+          <div class="metric-guide-card">
+            <h3>CA and Thal</h3>
+            <p>These structured clinical attributes provide additional model input for interpreting cardiovascular risk patterns.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card support-wide-card">
+        <div class="section-header-row">
+          <div>
+            <h2>How to Read the Results</h2>
+            <p class="section-subtext">
+              CardioX is a decision-support prototype and should always be used alongside professional judgement.
+            </p>
+          </div>
+        </div>
+
+        <div class="support-feature-grid">
+          <div class="support-feature-card">
+            <h3>Risk Percentage</h3>
+            <p>A probability-based estimate generated from the patient’s structured input values.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>Risk Band</h3>
+            <p>Low, Moderate, or High groupings designed to make interpretation clearer and more practical.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>SHAP Top Drivers</h3>
+            <p>The most influential features that pushed the model result upward or downward for that individual case.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>Personalised Advice</h3>
+            <p>Model-informed, source-backed advice designed to support practical interpretation of the assessment.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>Trend Visualisation</h3>
+            <p>Shows how selected values compare over time against a reference line for easier review.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>Clinical Judgement</h3>
+            <p>The platform supports decision-making, but final interpretation must remain with the clinician or authorised user.</p>
+          </div>
+        </div>
+      </section>
+
+    </section>
+  </main>
+
+  <footer class="public-footer">
+  <div class="footer-container">
+    <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
+    <p>
+      Designed for hospitals, NHS settings, healthcare professionals, and
+      cardiology-focused clinical workflows.
+    </p>
+  </div>
+</footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = localStorage.getItem("cardiox_username") || "User";
+      const role = localStorage.getItem("cardiox_role") || "clinician";
+
+      const navUserText = document.getElementById("navUserText");
+      const roleText = document.getElementById("roleText");
+      const dashboardNavLink = document.getElementById("dashboardNavLink");
+      const supportDashboardCta = document.getElementById("supportDashboardCta");
+      const navBrandLink = document.getElementById("navBrandLink");
+
+      const isAdmin = role === "admin";
+      const dashboardHref = isAdmin ? "admin.html" : "clinician.html";
+      const dashboardLabel = isAdmin ? "User Management" : "Patient Management";
+      const roleLabel = isAdmin ? "Admin" : "Clinician";
+
+      if (navUserText) navUserText.textContent = username;
+      if (roleText) roleText.textContent = roleLabel;
+
+      if (dashboardNavLink) {
+        dashboardNavLink.href = dashboardHref;
+        dashboardNavLink.textContent = dashboardLabel;
+      }
+
+      if (supportDashboardCta) {
+        supportDashboardCta.href = dashboardHref;
+        supportDashboardCta.textContent = `Go to ${dashboardLabel}`;
+      }
+
+      if (navBrandLink) {
+        navBrandLink.href = dashboardHref;
+      }
+
+      document.getElementById("btnLogout")?.addEventListener("click", () => {
+        logoutUser();
+      });
+    });
+  </script>
+</body>
+</html>

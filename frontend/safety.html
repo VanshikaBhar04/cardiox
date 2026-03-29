@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clinical Safety | CardioX</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+
+  <div id="navbarContainer"></div>
+  <script src="assets/navbar.js"></script>
+
+  <main class="public-page safety-page">
+
+    <section class="page-hero safety-hero">
+      <div class="hero-content">
+
+        <div class="card page-hero-card safety-hero-card">
+          <span class="hero-badge">Clinical Safety</span>
+          <h1>Designed to support responsible, transparent, and clinically supervised AI use.</h1>
+          <p>
+            CardioX is a cardiovascular decision support platform concept designed to assist healthcare
+            professionals with structured risk review, interpretable outputs, and safer presentation of
+            AI-supported information. This page outlines the platform’s safety position, operational
+            boundaries, and key principles for responsible use.
+          </p>
+
+          <div class="safety-hero-highlights">
+            <div class="safety-highlight-card">
+              <strong>Human-led review</strong>
+              <span>All outputs require clinician interpretation and oversight</span>
+            </div>
+            <div class="safety-highlight-card">
+              <strong>Transparent use</strong>
+              <span>Risk is presented clearly, not as an opaque black-box output</span>
+            </div>
+            <div class="safety-highlight-card">
+              <strong>Defined boundaries</strong>
+              <span>Designed for support, not autonomous diagnosis or treatment</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-image-card">
+          <img
+            src="assets/images/safety-clinical-review.jpg"
+            alt="Clinician reviewing patient safety and cardiovascular data"
+            class="hero-main-image"
+          />
+        </div>
+
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">System Position</span>
+        <h2>What CardioX is designed to do</h2>
+      </div>
+
+      <div class="card info-card-wide safety-wide-card">
+        <p>
+          CardioX is designed as a <strong>clinical decision support system</strong>, not as a diagnostic
+          tool or autonomous medical authority. Its purpose is to assist healthcare professionals by
+          presenting structured patient information, probability-based risk outputs, and supporting
+          interpretation features in a clear and reviewable format.
+        </p>
+
+        <p>
+          The platform is intended to complement professional judgement rather than replace it. Decisions
+          relating to diagnosis, treatment, escalation, and patient care must remain the responsibility of
+          qualified clinicians working within appropriate healthcare governance.
+        </p>
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Safety Principles</span>
+        <h2>Core principles that guide safe use</h2>
+      </div>
+
+      <div class="info-grid">
+        <div class="card info-card safety-principle-card">
+          <div class="info-icon">HO</div>
+          <h3>Human oversight</h3>
+          <p>
+            All CardioX outputs should be reviewed and interpreted by a clinician. The platform does not
+            make autonomous clinical decisions and does not remove the need for professional judgement.
+          </p>
+        </div>
+
+        <div class="card info-card safety-principle-card">
+          <div class="info-icon">TR</div>
+          <h3>Transparency</h3>
+          <p>
+            Risk outputs are presented using percentages, risk bands, and explainability-oriented features
+            to support clearer understanding of how results should be reviewed in practice.
+          </p>
+        </div>
+
+        <div class="card info-card safety-principle-card">
+          <div class="info-icon">CP</div>
+          <h3>Clarity of purpose</h3>
+          <p>
+            CardioX is positioned as a decision support platform concept rather than a certified medical
+            device, helping reduce over-reliance, misuse, or inappropriate interpretation.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Model Boundaries</span>
+        <h2>Important limitations of the prediction model</h2>
+      </div>
+
+      <div class="card info-card-wide safety-wide-card">
+        <p>
+          The machine learning model used in CardioX is trained on a <strong>UCI Cleveland-style heart
+          disease dataset</strong>. While useful for structured model development and probability-based
+          risk experimentation, this dataset does not fully capture the breadth of real-world patient
+          populations, local service variation, or all forms of clinical complexity.
+        </p>
+
+        <p>
+          For that reason, outputs should never be interpreted in isolation. Predictions should always be
+          considered alongside patient history, symptom context, additional tests, clinician expertise, and
+          the wider clinical picture.
+        </p>
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Data and Privacy</span>
+        <h2>Data-related safety considerations</h2>
+      </div>
+
+      <div class="info-grid">
+        <div class="card info-card safety-principle-card">
+          <div class="info-icon">DU</div>
+          <h3>Prototype data usage</h3>
+          <p>
+            CardioX is developed using publicly available structured datasets and simulated workflows rather
+            than live hospital patient data within the current implementation.
+          </p>
+        </div>
+
+        <div class="card info-card safety-principle-card">
+          <div class="info-icon">DB</div>
+          <h3>Data storage</h3>
+          <p>
+            The current platform uses SQLite as a lightweight persistence layer suited to the present system
+            implementation and demonstration workflow.
+          </p>
+        </div>
+
+        <div class="card info-card safety-principle-card">
+          <div class="info-icon">GD</div>
+          <h3>Privacy awareness</h3>
+          <p>
+            In a real deployment context, healthcare-grade data protection controls, privacy safeguards, and
+            regulatory compliance requirements such as GDPR would be essential.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Ethical Design</span>
+        <h2>Ethical considerations in AI-supported healthcare</h2>
+      </div>
+
+      <div class="info-grid">
+        <div class="card info-card safety-principle-card">
+          <div class="info-icon">BF</div>
+          <h3>Bias and fairness</h3>
+          <p>
+            Machine learning models can reflect limitations or biases present in their training data.
+            This must be considered carefully when reviewing outputs in a healthcare context.
+          </p>
+        </div>
+
+        <div class="card info-card safety-principle-card">
+          <div class="info-icon">RS</div>
+          <h3>Responsibility</h3>
+          <p>
+            CardioX provides support, not authority. Clinicians remain responsible for professional review,
+            decision-making, and all resulting care actions.
+          </p>
+        </div>
+
+        <div class="card info-card safety-principle-card">
+          <div class="info-icon">SC</div>
+          <h3>Safe communication</h3>
+          <p>
+            Outputs are presented in a structured and cautious way to reduce the risk of misinterpretation,
+            misplaced confidence, or overstatement of model capability.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Clinical Use Notice</span>
+        <h2>Important notice</h2>
+      </div>
+
+      <div class="card notice-card">
+        <p>
+          CardioX is intended to support cardiovascular risk review and professional clinical decision-making.
+          It is not a certified medical device and should not be used as a replacement for clinician judgement,
+          diagnosis, or treatment planning.
+        </p>
+
+        <p>
+          All outputs should be interpreted by qualified healthcare professionals and used only as one part of
+          a broader clinical assessment process carried out within appropriate healthcare governance.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="public-footer">
+    <div class="footer-container">
+      <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
+      <p>Designed for hospitals, NHS settings, healthcare professionals, and cardiology-focused clinical workflows.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

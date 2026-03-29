@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Request Clinician Access | CardioX</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <script src="assets/session.js"></script>
+  <script>
+    const session = getSession();
+    if (session.token && session.role) {
+      window.location.replace(getDashboardUrlByRole(session.role));
+    }
+  </script>
+</head>
+
+<body class="auth-page">
+
+<div id="navbarContainer"></div>
+<script src="assets/navbar.js"></script>
+
+  <main class="auth-shell">
+    <section class="auth-layout">
+
+      <div class="auth-hero-panel">
+        <span class="hero-badge">Clinician Access</span>
+        <h1>Request access to CardioX.</h1>
+        <p>
+          Submit your details for review. Once approved by an administrator, you will be able to
+          access the clinician workflow and begin using the platform.
+        </p>
+
+        <div class="auth-feature-list">
+          <div class="auth-feature-item">
+            <strong>Structured patient workflow</strong>
+            <span>Create patient records, run assessments, and review prior history in one place.</span>
+          </div>
+
+          <div class="auth-feature-item">
+            <strong>Interpretable AI support</strong>
+            <span>Use explainability, risk bands, and personalised guidance to support clinical review.</span>
+          </div>
+
+          <div class="auth-feature-item">
+            <strong>Admin-reviewed access</strong>
+            <span>All clinician requests are reviewed before activation to maintain controlled access.</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="card auth-card auth-card-wide">
+        <div class="auth-card-header">
+          <h2>Clinician Access Request</h2>
+          <p>Complete the form below to request access to the CardioX platform.</p>
+        </div>
+
+        <form id="signupForm" class="form-grid auth-form-grid">
+          <label>
+            First Name <span class="required-star">*</span>
+            <input id="signupFirstName" type="text" required />
+          </label>
+
+          <label>
+            Surname <span class="required-star">*</span>
+            <input id="signupLastName" type="text" required />
+          </label>
+
+          <label>
+            Work Email <span class="required-star">*</span>
+            <input id="signupEmail" type="email" required />
+          </label>
+
+          <label>
+            Department / Organisation <span class="required-star">*</span>
+            <input id="signupDepartment" type="text" required />
+          </label>
+
+          <label>
+            Password <span class="required-star">*</span>
+            <input id="signupPassword" type="password" required />
+          </label>
+
+          <label>
+            Confirm Password <span class="required-star">*</span>
+            <input id="signupConfirmPassword" type="password" required />
+          </label>
+
+          <div class="auth-password-rules">
+            <strong>Password requirements</strong>
+            <span>Minimum 6 characters, including 1 uppercase letter, 1 lowercase letter, and 1 symbol.</span>
+          </div>
+
+          <div class="auth-form-actions">
+            <button type="submit" class="primary auth-submit-btn">Request Access</button>
+          </div>
+
+          <p id="signupStatus" class="status"></p>
+        </form>
+
+        <p class="auth-footer-text">
+          Already have an account?
+          <a href="login.html" class="inline-link">Sign in</a>
+        </p>
+      </section>
+
+    </section>
+  </main>
+
+  <script src="assets/signup.js"></script>
+</body>
+</html>

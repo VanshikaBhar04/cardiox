@@ -1,176 +1,227 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CardioX – Heart Attack Risk Prediction</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CardioX | AI-Powered Clinical Decision Support</title>
   <link rel="stylesheet" href="assets/styles.css" />
-  <script>
-  if (!localStorage.getItem("cardiox_token")) {
-    window.location.replace("login.html");
-  }
-</script>
-
 </head>
-
 <body>
-  <div class="container">
-    <header>
-      <h1>CardioX</h1>
-      <p>Clinician-facing prototype for probability-based heart attack risk prediction.</p>
-    </header>
 
-    <!-- This is for the Patient Input -->
-    <section class="card">
-      <h2>Patient Input</h2>
+  <div id="navbarContainer"></div>
+  <script src="assets/navbar.js"></script>
 
-      <div class="actions">
-        <button id="btnLoadExample" type="button">Load Example Patient</button>
-        <button id="btnClear" type="button" class="secondary">Clear</button>
-      </div>
-
-      <form id="predictForm">
-        <div class="grid">
-          <label>
-            Age
-            <input name="age" type="number" min="1" max="120" required />
-          </label>
-
-          <label>
-            Sex
-            <select name="sex" required>
-              <option value="">Select…</option>
-              <option>Male</option>
-              <option>Female</option>
-            </select>
-          </label>
-
-          <label>
-            Chest Pain (cp)
-            <select name="cp" required>
-              <option value="">Select…</option>
-              <option>typical angina</option>
-              <option>atypical angina</option>
-              <option>non-anginal</option>
-              <option>asymptomatic</option>
-            </select>
-          </label>
-
-          <label>
-            Resting BP (trestbps)
-            <input name="trestbps" type="number" min="50" max="250" step="1" />
-          </label>
-
-          <label>
-            Cholesterol (chol)
-            <input name="chol" type="number" min="50" max="800" step="1" />
-          </label>
-
-          <label>
-            Fasting Blood Sugar > 120 (fbs)
-            <select name="fbs" required>
-              <option value="">Select…</option>
-              <option>True</option>
-              <option>False</option>
-            </select>
-          </label>
-
-          <label>
-            Rest ECG (restecg)
-            <select name="restecg" required>
-              <option value="">Select…</option>
-              <option>normal</option>
-              <option>stt abnormality</option>
-              <option>lv hypertrophy</option>
-            </select>
-          </label>
-
-          <label>
-            Max Heart Rate (thalch)
-            <input name="thalch" type="number" min="60" max="250" step="1" />
-          </label>
-
-          <label>
-            Exercise-induced Angina (exang)
-            <select name="exang" required>
-              <option value="">Select…</option>
-              <option>True</option>
-              <option>False</option>
-            </select>
-          </label>
-
-          <label>
-            Oldpeak (ST depression)
-            <input name="oldpeak" type="number" min="0" max="10" step="0.1" />
-          </label>
-
-          <label>
-            Slope
-            <select name="slope" required>
-              <option value="">Select…</option>
-              <option>upsloping</option>
-              <option>flat</option>
-              <option>downsloping</option>
-            </select>
-          </label>
-
-          <label>
-            CA (0–3)
-            <input name="ca" type="number" min="0" max="3" step="1" />
-          </label>
-
-          <label>
-            Thal
-            <select name="thal" required>
-              <option value="">Select…</option>
-              <option>normal</option>
-              <option>fixed defect</option>
-              <option>reversable defect</option>
-            </select>
-          </label>
-        </div>
-
-        <button id="btnPredict" type="submit" class="primary">Predict Risk</button>
-      </form>
-
-      <div id="status" class="status" aria-live="polite"></div>
-    </section>
-
-    <!-- This is the Prediction Result -->
-    <section class="card">
-      <h2>Prediction Result</h2>
-
-      <div class="result">
+  <main class="public-page">
+    <section id="sessionBanner" class="session-banner" style="display:none;">
+      <div class="session-banner-content">
         <div>
-          <div class="label">Estimated Risk</div>
-          <div id="percentageOfRisk" class="big">—</div>
+          <div class="session-banner-title" id="sessionBannerTitle">Welcome back</div>
+          <div class="session-banner-text" id="sessionBannerText"></div>
         </div>
-
-        <div>
-          <div class="label">Risk Band</div>
-          <div id="bandOfRisk" class="pill">—</div>
-        </div>
+        <a id="sessionBannerBtn" href="#" class="btn-link primary-link">Continue</a>
       </div>
-
-      <p class="note">
-        This is a prototype decision-support indicator (probability-based), not a clinical diagnosis.
-      </p>
     </section>
 
-    <!-- This is the Prediction History -->
-    <section class="card">
-      <h2>Prediction History</h2>
+    <section class="hero-section">
+      <div class="hero-content hero-content-with-image">
+        <div class="hero-text">
+          <span class="hero-badge">Designed for Clinical Decision Support</span>
+          <h1>Smarter cardiovascular risk assessment for modern clinical teams.</h1>
+          <p>
+            CardioX is a clinician-facing cardiovascular decision support platform designed for hospitals,
+            NHS environments, healthcare professionals, and cardiology teams. It helps clinicians assess
+            heart attack risk through structured patient evaluation, interpretable risk outputs, assessment
+            history, and workflow-focused digital tools.
+          </p>
 
-      <div class="actions">
-        <button id="btnLoadHistory" type="button">Load Prediction History</button>
-      </div>
+          <div class="hero-actions">
+            <a id="heroPrimaryCta" href="login.html" class="btn-link primary-link">Access CardioX</a>
+            <a id="heroSecondaryCta" href="about.html" class="btn-link secondary-link">Explore Platform</a>
+          </div>
 
-      <div id="history" class="history">
-        <p class="note">No history loaded yet.</p>
+          <div class="hero-mini-stats">
+            <div class="hero-stat-card">
+              <strong>Clinical</strong>
+              <span>Decision support workflow</span>
+            </div>
+            <div class="hero-stat-card">
+              <strong>Interpretable</strong>
+              <span>Risk outputs and insights</span>
+            </div>
+            <div class="hero-stat-card">
+              <strong>Role-Based</strong>
+              <span>Clinician and admin access</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-visual-stack">
+          <div class="hero-image-card">
+            <img
+              src="assets/images/home-dashboard.jpg"
+              alt="CardioX healthcare dashboard interface"
+              class="hero-main-image"
+            />
+          </div>
+
+          <div class="card hero-info-card">
+            <div class="card-kicker">Platform Overview</div>
+            <h2>Built to support real clinical environments</h2>
+            <p>
+              CardioX combines cardiovascular risk prediction, patient assessment workflows, explainable
+              outputs, and reporting tools in one professional web-based interface designed to align with
+              healthcare use cases.
+            </p>
+
+            <ul class="feature-list">
+              <li>Probability-based heart attack risk assessment</li>
+              <li>Structured patient and assessment management</li>
+              <li>Role-based clinician and admin experience</li>
+              <li>Trend tracking, reporting, and personalised guidance</li>
+            </ul>
+
+            <div class="hero-panel-note">
+              <span class="status-dot"></span>
+              <p>Purpose-built for clinical review, safer interpretation, and efficient patient workflows.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
-  </div>
 
-  <script src="assets/app.js" defer></script>
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Why CardioX</span>
+        <h2>A more practical and transparent approach to cardiovascular assessment</h2>
+        <p>
+          CardioX is designed to help healthcare professionals move from isolated risk scores to clearer,
+          more usable clinical insight.
+        </p>
+      </div>
+
+      <div class="info-grid">
+        <div class="card info-card">
+          <div class="info-icon">01</div>
+          <h3>Clinician-Centred Workflow</h3>
+          <p>
+            Support patient review, structured data entry, assessment history, and follow-up actions through
+            a workflow designed for busy clinical settings.
+          </p>
+        </div>
+
+        <div class="card info-card">
+          <div class="info-icon">02</div>
+          <h3>Interpretable Risk Output</h3>
+          <p>
+            CardioX presents risk as a percentage and banded outcome, making results easier to review,
+            communicate, and use alongside professional clinical judgement.
+          </p>
+        </div>
+
+        <div class="card info-card">
+          <div class="info-icon">03</div>
+          <h3>Designed for Responsible Use</h3>
+          <p>
+            The platform is positioned as a decision support tool that strengthens clinical assessment while
+            maintaining appropriate human oversight in care decisions.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="public-section platform-highlights-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Platform Highlights</span>
+        <h2>Core capabilities that support clinical teams</h2>
+      </div>
+
+      <div class="info-grid">
+        <div class="card info-card">
+          <div class="info-icon">AI</div>
+          <h3>Machine Learning Risk Engine</h3>
+          <p>
+            CardioX uses a trained machine learning model to estimate cardiovascular risk from structured
+            clinical attributes, supporting more data-informed review during assessment.
+          </p>
+        </div>
+
+        <div class="card info-card">
+          <div class="info-icon">UX</div>
+          <h3>Professional Clinical Interface</h3>
+          <p>
+            The interface is designed to feel clear, calm, and operational, using strong hierarchy, clean
+            layouts, and readable components suited to healthcare environments.
+          </p>
+        </div>
+
+        <div class="card info-card">
+          <div class="info-icon">REP</div>
+          <h3>Assessment, Trends, and Reporting</h3>
+          <p>
+            Review patient records, track assessment history, monitor trends over time, and generate reports
+            that support documentation and communication.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="public-section value-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Clinical Value</span>
+        <h2>Supporting safer, clearer cardiovascular decision support</h2>
+      </div>
+
+      <div class="info-grid">
+        <div class="card info-card">
+          <h3>For Hospitals and Trusts</h3>
+          <p>
+            A structured digital workflow that can support consistency, documentation, and clearer review of
+            cardiovascular risk outputs.
+          </p>
+        </div>
+
+        <div class="card info-card">
+          <h3>For Cardiology Teams</h3>
+          <p>
+            Faster access to patient-focused risk interpretation, assessment history, and supporting insights
+            that can assist with follow-up and communication.
+          </p>
+        </div>
+
+        <div class="card info-card">
+          <h3>For Healthcare Professionals</h3>
+          <p>
+            A platform designed to reduce friction, improve clarity, and present risk information in a more
+            actionable and understandable format.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Safety and Governance</span>
+        <h2>Important clinical use notice</h2>
+      </div>
+
+      <div class="card notice-card">
+        <p>
+          CardioX is intended to support cardiovascular risk review and clinical decision-making. It is not
+          designed to replace clinician judgement, diagnosis, or treatment planning, and should always be
+          used within appropriate professional governance and healthcare oversight.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="public-footer">
+    <div class="footer-container">
+      <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
+      <p>Designed for hospitals, NHS settings, healthcare professionals, and cardiology-focused clinical workflows.</p>
+    </div>
+  </footer>
+
+  <script src="assets/session.js"></script>
+  <script src="assets/index.js"></script>
 </body>
 </html>

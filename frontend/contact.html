@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact CardioX | Support and Information</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+
+  <div id="navbarContainer"></div>
+  <script src="assets/navbar.js"></script>
+
+  <main class="public-page contact-page">
+    <section class="page-hero contact-hero">
+      <div class="hero-content">
+
+        <div class="card page-hero-card contact-hero-card">
+          <span class="hero-badge">Contact CardioX</span>
+          <h1>Support, guidance, and platform information for CardioX users.</h1>
+          <p>
+            CardioX is designed to support healthcare professionals with structured cardiovascular
+            risk review, assessment workflow, and interpretable clinical decision support. This page
+            provides support guidance, common troubleshooting advice, and answers to frequently asked questions.
+          </p>
+
+          <div class="contact-hero-highlights">
+            <div class="contact-highlight-card">
+              <strong>Platform support</strong>
+              <span>Guidance for clinicians, admins, and workflow-related questions</span>
+            </div>
+            <div class="contact-highlight-card">
+              <strong>Technical help</strong>
+              <span>Support for login, page, and assessment issues</span>
+            </div>
+            <div class="contact-highlight-card">
+              <strong>Quick answers</strong>
+              <span>Common questions and troubleshooting in one place</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-image-card">
+          <img
+            src="assets/images/contact-support.jpg"
+            alt="Healthcare support and digital platform assistance"
+            class="hero-main-image"
+          />
+        </div>
+
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Get In Touch</span>
+        <h2>Support channels</h2>
+        <p>
+          Use the appropriate contact route depending on whether your question relates to workflow support
+          or technical platform issues.
+        </p>
+      </div>
+
+      <div class="contact-grid">
+        <div class="card contact-card">
+          <div class="contact-card-label">Support</div>
+          <h3>Platform support</h3>
+          <p>
+            For questions about the CardioX workflow, patient assessment process, reporting,
+            explainability features, or general platform usage, contact the CardioX support team.
+          </p>
+
+          <div class="contact-detail">
+            <strong>Email</strong>
+            <span>support@cardiox-demo.local</span>
+          </div>
+
+          <div class="contact-detail">
+            <strong>Availability</strong>
+            <span>Monday to Friday, 9:00 AM – 5:00 PM</span>
+          </div>
+        </div>
+
+        <div class="card contact-card">
+          <div class="contact-card-label">Technical</div>
+          <h3>Technical help</h3>
+          <p>
+            If you experience issues such as login errors, loading failures, missing outputs, or
+            assessment submission problems, contact technical support with full issue details.
+          </p>
+
+          <div class="contact-detail">
+            <strong>Email</strong>
+            <span>technical@cardiox-demo.local</span>
+          </div>
+
+          <div class="contact-detail">
+            <strong>Best information to include</strong>
+            <span>Page name, issue description, user role, and the action being performed</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Quick Help</span>
+        <h2>Common support topics</h2>
+      </div>
+
+      <div class="info-grid">
+        <div class="card info-card contact-topic-card">
+          <div class="info-icon">LG</div>
+          <h3>Login access</h3>
+          <p>
+            Confirm that you are using the correct username and password and that your access level
+            matches the area of the platform you are trying to use.
+          </p>
+        </div>
+
+        <div class="card info-card contact-topic-card">
+          <div class="info-icon">AS</div>
+          <h3>Assessment workflow</h3>
+          <p>
+            Clinicians should first search for or create a patient record before starting an
+            assessment and generating a cardiovascular risk output.
+          </p>
+        </div>
+
+        <div class="card info-card contact-topic-card">
+          <div class="info-icon">PR</div>
+          <h3>Prediction output</h3>
+          <p>
+            If a prediction is not displayed, check that all required fields are completed correctly
+            and that the backend service is available and responding.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Frequently Asked Questions</span>
+        <h2>Answers to common questions</h2>
+      </div>
+
+      <div class="faq-list">
+        <div class="card faq-card">
+          <h3>Who is CardioX designed for?</h3>
+          <p>
+            CardioX is designed for healthcare professionals, clinician-facing teams, and cardiology-focused
+            workflows that require structured cardiovascular risk review and interpretable decision support.
+          </p>
+        </div>
+
+        <div class="card faq-card">
+          <h3>Does CardioX use real patient data?</h3>
+          <p>
+            No. The current implementation is based on a Cleveland-style heart disease dataset used for
+            model development and system prototyping rather than live patient data.
+          </p>
+        </div>
+
+        <div class="card faq-card">
+          <h3>Does CardioX provide a medical diagnosis?</h3>
+          <p>
+            No. CardioX is intended to support cardiovascular risk review and professional clinical
+            decision-making. It does not replace diagnosis, treatment planning, or clinician judgement.
+          </p>
+        </div>
+
+        <div class="card faq-card">
+          <h3>What machine learning model does CardioX use?</h3>
+          <p>
+            The current implementation uses a Random Forest model to generate a probability-based
+            heart attack risk output from structured clinical attributes.
+          </p>
+        </div>
+
+        <div class="card faq-card">
+          <h3>Where is application data stored?</h3>
+          <p>
+            The current platform uses SQLite as a lightweight persistence layer for application and
+            assessment records within the present system architecture.
+          </p>
+        </div>
+
+        <div class="card faq-card">
+          <h3>What should I do if the system is not working?</h3>
+          <p>
+            Check that the backend service is running, confirm that you are signed in with the correct role,
+            and make sure all required form fields are completed before submitting a workflow action.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="public-section">
+      <div class="section-heading">
+        <span class="section-eyebrow">Clinical Use Notice</span>
+        <h2>Important notice</h2>
+      </div>
+
+      <div class="card notice-card">
+        <p>
+          Contact information on this page is presented for platform demonstration and support-flow purposes.
+          CardioX is intended as a cardiovascular decision support platform concept and should not be treated
+          as a replacement for live hospital governance, production support infrastructure, or clinical judgement.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="public-footer">
+    <div class="footer-container">
+      <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
+      <p>Designed for hospitals, NHS settings, healthcare professionals, and cardiology-focused clinical workflows.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

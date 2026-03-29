@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CardioX Safety & Compliance</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <script src="assets/session.js"></script>
+  <script>
+    const role = localStorage.getItem("cardiox_role");
+    if (!localStorage.getItem("cardiox_token") || (role !== "clinician" && role !== "admin")) {
+      window.location.replace("login.html");
+    }
+  </script>
+</head>
+<body>
+
+  <div id="navbarContainer"></div>
+  <script src="assets/navbar.js"></script>
+
+  <main class="container support-page-container">
+
+    <section class="support-hero-section">
+      <div class="support-hero-card">
+        <span class="hero-badge">Operational Support & Safe Use</span>
+        <h1>Safety & Compliance</h1>
+        <p>
+          This page provides operational support routes, escalation guidance, and practical solutions
+          to common issues when using CardioX in a controlled academic prototype environment.
+        </p>
+
+        <div class="support-hero-actions">
+          <a id="complianceDashboardCta" href="clinician.html" class="btn-link primary-link">Go to Patient Management</a>
+          <a href="help.html" class="btn-link secondary-link">View Help & Support</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="support-section-stack">
+
+      <section class="card support-wide-card">
+        <div class="section-header-row">
+          <div>
+            <h2>Support Contacts</h2>
+            <p class="section-subtext">
+              Use the correct support channel depending on the urgency and type of issue you are experiencing.
+            </p>
+          </div>
+        </div>
+
+        <div class="support-feature-grid">
+          <div class="support-feature-card">
+            <h3>System Help Desk</h3>
+            <p><strong>020 7123 4567</strong></p>
+            <p>Use this for login, access, dashboard, and urgent workflow issues during working hours.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>Technical Support Email</h3>
+            <p><strong>support@cardiox-demo.local</strong></p>
+            <p>Use this for non-urgent technical queries, troubleshooting follow-up, and general product support.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>Admin / Supervisor Contact</h3>
+            <p><strong>admin@cardiox-demo.local</strong></p>
+            <p>Use this for clinician approvals, access requests, role-related issues, and account escalation.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card support-wide-card">
+        <div class="section-header-row">
+          <div>
+            <h2>Frequent Issues and Solutions</h2>
+            <p class="section-subtext">
+              These are the most common operational issues and the quickest recommended next steps.
+            </p>
+          </div>
+        </div>
+
+        <div class="support-feature-grid">
+          <div class="support-feature-card">
+            <h3>I cannot log in</h3>
+            <p>Check that your username and password are correct. If you recently requested clinician access, your account may still be awaiting approval.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>I can log in but cannot open the dashboard</h3>
+            <p>Make sure you are opening the correct workspace for your role. Admin users should open the admin page and clinicians should open the clinician page.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>Patient selection is not working</h3>
+            <p>Refresh the page and confirm the backend is running. If the problem continues, contact support and provide the affected patient ID.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>Assessment history is missing</h3>
+            <p>Only assessments linked to the selected patient will appear. Try reselecting the patient and checking the latest assessment first.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>I cannot export a PDF report</h3>
+            <p>Make sure an assessment is currently loaded and your session has not expired. Then try the export action again from the assessment page.</p>
+          </div>
+
+          <div class="support-feature-card">
+            <h3>My signup request is still pending</h3>
+            <p>Admin approval is required before clinician access is enabled. Contact the admin support email if your request has been delayed.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card support-wide-card">
+        <div class="section-header-row">
+          <div>
+            <h2>Safe Use Guidance</h2>
+            <p class="section-subtext">
+              These principles should always be followed when using CardioX in a clinical-style workflow.
+            </p>
+          </div>
+        </div>
+
+        <div class="support-steps-grid">
+          <div class="support-step-card">
+            <div class="support-step-badge">1</div>
+            <h3>Use outputs as support only</h3>
+            <p>CardioX provides decision-support information and must never replace professional judgement or clinical responsibility.</p>
+          </div>
+
+          <div class="support-step-card">
+            <div class="support-step-badge">2</div>
+            <h3>Check data before submission</h3>
+            <p>Incorrect patient values can affect predictions, interpretation, stored assessment history, and exported reports.</p>
+          </div>
+
+          <div class="support-step-card">
+            <div class="support-step-badge">3</div>
+            <h3>Interpret risk in context</h3>
+            <p>Review the percentage, risk band, explainability, and advice alongside the patient’s wider history and clinical picture.</p>
+          </div>
+
+          <div class="support-step-card">
+            <div class="support-step-badge">4</div>
+            <h3>Escalate system issues early</h3>
+            <p>If the system behaves unexpectedly or appears unstable, stop and contact support rather than relying on uncertain output.</p>
+          </div>
+
+          <div class="support-step-card">
+            <div class="support-step-badge">5</div>
+            <h3>Protect workflow integrity</h3>
+            <p>Use the correct role-based area of the system and avoid using pages or actions not intended for your current permission level.</p>
+          </div>
+
+          <div class="support-step-card">
+            <div class="support-step-badge">6</div>
+            <h3>Remember the project scope</h3>
+            <p>CardioX is an academic prototype and not a certified diagnostic or treatment tool for real-world deployment.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card support-wide-card">
+        <div class="section-header-row">
+          <div>
+            <h2>When to Escalate</h2>
+            <p class="section-subtext">
+              The situations below should be escalated rather than worked around informally.
+            </p>
+          </div>
+        </div>
+
+        <div class="metric-guide-grid">
+          <div class="metric-guide-card">
+            <h3>Repeated login or access failures</h3>
+            <p>If users are repeatedly blocked from role-appropriate pages, contact support rather than repeatedly retrying credentials.</p>
+          </div>
+
+          <div class="metric-guide-card">
+            <h3>Missing or incorrect patient data</h3>
+            <p>If patient details appear incorrect, pause the workflow and correct the record before creating or updating an assessment.</p>
+          </div>
+
+          <div class="metric-guide-card">
+            <h3>Export or report issues</h3>
+            <p>If PDF generation fails or appears inconsistent, escalate the issue and avoid using partial or uncertain output.</p>
+          </div>
+
+          <div class="metric-guide-card">
+            <h3>Unexpected model behaviour</h3>
+            <p>If the output appears clinically inconsistent or technically unstable, escalate to support and document the case clearly.</p>
+          </div>
+        </div>
+      </section>
+
+    </section>
+  </main>
+
+  <footer class="public-footer">
+  <div class="footer-container">
+    <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
+    <p>
+      Designed for hospitals, NHS settings, healthcare professionals, and
+      cardiology-focused clinical workflows.
+    </p>
+  </div>
+</footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = localStorage.getItem("cardiox_username") || "User";
+      const role = localStorage.getItem("cardiox_role") || "clinician";
+
+      const navUserText = document.getElementById("navUserText");
+      const roleText = document.getElementById("roleText");
+      const dashboardNavLink = document.getElementById("dashboardNavLink");
+      const complianceDashboardCta = document.getElementById("complianceDashboardCta");
+      const navBrandLink = document.getElementById("navBrandLink");
+
+      const isAdmin = role === "admin";
+      const dashboardHref = isAdmin ? "admin.html" : "clinician.html";
+      const dashboardLabel = isAdmin ? "User Management" : "Patient Management";
+      const roleLabel = isAdmin ? "Admin" : "Clinician";
+
+      if (navUserText) navUserText.textContent = username;
+      if (roleText) roleText.textContent = roleLabel;
+
+      if (dashboardNavLink) {
+        dashboardNavLink.href = dashboardHref;
+        dashboardNavLink.textContent = dashboardLabel;
+      }
+
+      if (complianceDashboardCta) {
+        complianceDashboardCta.href = dashboardHref;
+        complianceDashboardCta.textContent = `Go to ${dashboardLabel}`;
+      }
+
+      if (navBrandLink) {
+        navBrandLink.href = dashboardHref;
+      }
+
+      document.getElementById("btnLogout")?.addEventListener("click", () => {
+        logoutUser();
+      });
+    });
+  </script>
+</body>
+</html>
