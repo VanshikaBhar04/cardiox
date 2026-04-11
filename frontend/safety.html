@@ -1,21 +1,34 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- --------------------------------------------------
+       Document metadata
+  --------------------------------------------------- -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Clinical Safety | CardioX</title>
+
+  <!-- Shared stylesheet -->
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
-
+  <!-- --------------------------------------------------
+       Shared navigation
+  --------------------------------------------------- -->
   <div id="navbarContainer"></div>
+
+  <!-- Session helpers must load before navbar logic -->
+  <script src="assets/session.js"></script>
   <script src="assets/navbar.js"></script>
 
+  <!-- --------------------------------------------------
+       Main safety content
+  --------------------------------------------------- -->
   <main class="public-page safety-page">
-
+    <!-- Hero section -->
     <section class="page-hero safety-hero">
       <div class="hero-content">
-
         <div class="card page-hero-card safety-hero-card">
           <span class="hero-badge">Clinical Safety</span>
           <h1>Designed to support responsible, transparent, and clinically supervised AI use.</h1>
@@ -31,10 +44,12 @@
               <strong>Human-led review</strong>
               <span>All outputs require clinician interpretation and oversight</span>
             </div>
+
             <div class="safety-highlight-card">
               <strong>Transparent use</strong>
               <span>Risk is presented clearly, not as an opaque black-box output</span>
             </div>
+
             <div class="safety-highlight-card">
               <strong>Defined boundaries</strong>
               <span>Designed for support, not autonomous diagnosis or treatment</span>
@@ -49,10 +64,10 @@
             class="hero-main-image"
           />
         </div>
-
       </div>
     </section>
 
+    <!-- System position section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">System Position</span>
@@ -75,6 +90,7 @@
       </div>
     </section>
 
+    <!-- Safety principles section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Safety Principles</span>
@@ -111,6 +127,7 @@
       </div>
     </section>
 
+    <!-- Model boundaries section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Model Boundaries</span>
@@ -133,6 +150,7 @@
       </div>
     </section>
 
+    <!-- Data and privacy section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Data and Privacy</span>
@@ -169,6 +187,7 @@
       </div>
     </section>
 
+    <!-- Ethical design section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Ethical Design</span>
@@ -205,6 +224,7 @@
       </div>
     </section>
 
+    <!-- Clinical use notice section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Clinical Use Notice</span>
@@ -224,15 +244,16 @@
         </p>
       </div>
     </section>
-
   </main>
 
+  <!-- --------------------------------------------------
+       Footer
+  --------------------------------------------------- -->
   <footer class="public-footer">
     <div class="footer-container">
       <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
       <p>Designed for hospitals, NHS settings, healthcare professionals, and cardiology-focused clinical workflows.</p>
     </div>
   </footer>
-
 </body>
 </html>

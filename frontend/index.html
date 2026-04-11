@@ -1,17 +1,32 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- --------------------------------------------------
+       Document metadata
+  --------------------------------------------------- -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>CardioX | AI-Powered Clinical Decision Support</title>
+
+  <!-- Shared stylesheet -->
   <link rel="stylesheet" href="assets/styles.css" />
+
+  <!-- Session helpers must load before any script that depends on them -->
+  <script src="assets/session.js"></script>
 </head>
 <body>
-
+  <!-- --------------------------------------------------
+       Shared navigation
+  --------------------------------------------------- -->
   <div id="navbarContainer"></div>
   <script src="assets/navbar.js"></script>
 
+  <!-- --------------------------------------------------
+       Main homepage content
+  --------------------------------------------------- -->
   <main class="public-page">
+    <!-- Active session banner -->
     <section id="sessionBanner" class="session-banner" style="display:none;">
       <div class="session-banner-content">
         <div>
@@ -22,6 +37,7 @@
       </div>
     </section>
 
+    <!-- Hero section -->
     <section class="hero-section">
       <div class="hero-content hero-content-with-image">
         <div class="hero-text">
@@ -44,10 +60,12 @@
               <strong>Clinical</strong>
               <span>Decision support workflow</span>
             </div>
+
             <div class="hero-stat-card">
               <strong>Interpretable</strong>
               <span>Risk outputs and insights</span>
             </div>
+
             <div class="hero-stat-card">
               <strong>Role-Based</strong>
               <span>Clinician and admin access</span>
@@ -89,6 +107,7 @@
       </div>
     </section>
 
+    <!-- Why CardioX section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Why CardioX</span>
@@ -129,6 +148,7 @@
       </div>
     </section>
 
+    <!-- Platform highlights section -->
     <section class="public-section platform-highlights-section">
       <div class="section-heading">
         <span class="section-eyebrow">Platform Highlights</span>
@@ -165,6 +185,7 @@
       </div>
     </section>
 
+    <!-- Clinical value section -->
     <section class="public-section value-section">
       <div class="section-heading">
         <span class="section-eyebrow">Clinical Value</span>
@@ -198,6 +219,7 @@
       </div>
     </section>
 
+    <!-- Safety notice section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Safety and Governance</span>
@@ -214,6 +236,9 @@
     </section>
   </main>
 
+  <!-- --------------------------------------------------
+       Footer
+  --------------------------------------------------- -->
   <footer class="public-footer">
     <div class="footer-container">
       <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
@@ -221,7 +246,7 @@
     </div>
   </footer>
 
-  <script src="assets/session.js"></script>
+  <!-- Homepage-specific script -->
   <script src="assets/index.js"></script>
 </body>
 </html>

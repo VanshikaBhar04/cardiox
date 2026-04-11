@@ -1,12 +1,34 @@
-// --- Auth guard: require login ---
-const token = localStorage.getItem("cardiox_token");
-if (!token) {
-  window.location.href = "login.html";
+// --------------------------------------------------
+// CardioX Legacy Prediction Script
+// --------------------------------------------------
+
+// Handles a basic authenticated prediction workflow,
+// example data loading, form reset, and prediction history display.
+
+
+// --------------------------------------------------
+// Authentication guard
+// --------------------------------------------------
+
+// Uses centralised session helpers to validate login state
+if (!isLoggedIn()) {
+  logoutUser();
 }
+
+const { token } = getSession();
+
+
+// --------------------------------------------------
+// API endpoints
+// --------------------------------------------------
 
 const API_URL = "http://127.0.0.1:8000/predict";
 const HISTORY_URL = "http://127.0.0.1:8000/predictions";
 
+
+// --------------------------------------------------
+// Main page elements
+// --------------------------------------------------
 
 const form = document.getElementById("predictForm");
 const statusEl = document.getElementById("status");
@@ -20,14 +42,18 @@ const btnLoadHistory = document.getElementById("btnLoadHistory");
 const historyEl = document.getElementById("history");
 
 
-// ----- These are helper Functions ----- 
+// --------------------------------------------------
+// UI helper functions
+// --------------------------------------------------
 
 function setStatus(msg, isError = false) {
+  // Updates the prediction status message on the page
   statusEl.textContent = msg;
   statusEl.style.color = isError ? "#ff6b6b" : "#aab4e6";
 }
 
 function setResult(percentageOfRisk, bandOfRisk) {
+  // Displays the latest predicted risk score and band
   percentageOfRiskEl.textContent = `${percentageOfRisk}%`;
   bandOfRiskEl.textContent = bandOfRisk;
 
@@ -35,14 +61,24 @@ function setResult(percentageOfRisk, bandOfRisk) {
     bandOfRisk === "High"
       ? "rgba(255,107,107,0.25)"
       : bandOfRisk === "Moderate"
-      ? "rgba(255,212,59,0.25)"
-      : "rgba(105,219,124,0.25)";
+        ? "rgba(255,212,59,0.25)"
+        : "rgba(105,219,124,0.25)";
+}
+
+function bandStyle(band) {
+  // Returns a visual colour style for historical risk bands
+  if (band === "High") return "rgba(255,107,107,0.25)";
+  if (band === "Moderate") return "rgba(255,212,59,0.25)";
+  return "rgba(105,219,124,0.25)";
 }
 
 
-// ----- Used to Load an example patient ----- 
+// --------------------------------------------------
+// Example data loading
+// --------------------------------------------------
 
 btnLoadExample.addEventListener("click", () => {
+  // Loads a sample patient profile to demonstrate the model workflow
   form.age.value = 63;
   form.sex.value = "Male";
   form.cp.value = "typical angina";
@@ -61,9 +97,12 @@ btnLoadExample.addEventListener("click", () => {
 });
 
 
-// ----- Clearing the form ----- 
+// --------------------------------------------------
+// Form reset
+// --------------------------------------------------
 
 btnClear.addEventListener("click", () => {
+  // Resets all input fields and clears the displayed prediction result
   form.reset();
   percentageOfRiskEl.textContent = "—";
   bandOfRiskEl.textContent = "—";
@@ -71,7 +110,9 @@ btnClear.addEventListener("click", () => {
 });
 
 
-// ----- Submitting and then calling the API ----- 
+// --------------------------------------------------
+// Prediction form submission
+// --------------------------------------------------
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -113,13 +154,13 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-function bandStyle(band) {
-  if (band === "High") return "rgba(255,107,107,0.25)";
-  if (band === "Moderate") return "rgba(255,212,59,0.25)";
-  return "rgba(105,219,124,0.25)";
-}
+
+// --------------------------------------------------
+// Prediction history rendering
+// --------------------------------------------------
 
 function renderHistory(items) {
+  // Renders previously saved prediction records
   if (!items || items.length === 0) {
     historyEl.innerHTML = `<p class="note">No predictions saved yet.</p>`;
     return;
@@ -128,6 +169,7 @@ function renderHistory(items) {
   historyEl.innerHTML = items.map((row) => {
     const when = row.created_at ? row.created_at.replace("T", " ").slice(0, 19) : "—";
     const meta = `#${row.id} • ${when} • Age ${row.age ?? "—"} • ${row.sex ?? "—"} • ${row.cp ?? "—"}`;
+
     return `
       <div class="history-item">
         <div class="history-meta">${meta}</div>
@@ -138,7 +180,13 @@ function renderHistory(items) {
   }).join("");
 }
 
+
+// --------------------------------------------------
+// Load history action
+// --------------------------------------------------
+
 btnLoadHistory.addEventListener("click", async () => {
+  // Loads previously saved prediction history for the authenticated user
   setStatus("Loading prediction history...");
 
   try {
@@ -148,7 +196,9 @@ btnLoadHistory.addEventListener("click", async () => {
       }
     });
 
-    if (!res.ok) throw new Error(`History API error (${res.status})`);
+    if (!res.ok) {
+      throw new Error(`History API error (${res.status})`);
+    }
 
     const items = await res.json();
     renderHistory(items);

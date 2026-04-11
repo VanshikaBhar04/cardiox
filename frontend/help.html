@@ -1,25 +1,41 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- --------------------------------------------------
+       Document metadata
+  --------------------------------------------------- -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <title>CardioX Help & Support</title>
+
+  <!-- Shared stylesheet -->
   <link rel="stylesheet" href="assets/styles.css" />
+
+  <!-- Session helpers must load before any script that depends on them -->
   <script src="assets/session.js"></script>
+
+  <!-- Route protection for admin and clinician access -->
   <script>
     const role = localStorage.getItem("cardiox_role");
+
     if (!localStorage.getItem("cardiox_token") || (role !== "clinician" && role !== "admin")) {
       window.location.replace("login.html");
     }
   </script>
 </head>
 <body>
+  <!-- --------------------------------------------------
+       Shared navigation
+  --------------------------------------------------- -->
+  <div id="navbarContainer"></div>
+  <script src="assets/navbar.js"></script>
 
-<div id="navbarContainer"></div>
-<script src="assets/navbar.js"></script>
-
+  <!-- --------------------------------------------------
+       Main help and support content
+  --------------------------------------------------- -->
   <main class="container support-page-container">
-
+    <!-- Hero section -->
     <section class="support-hero-section">
       <div class="support-hero-card">
         <span class="hero-badge">Guidance for First-Time Users</span>
@@ -37,7 +53,7 @@
     </section>
 
     <section class="support-section-stack">
-
+      <!-- Quick start workflow -->
       <section class="card support-wide-card">
         <div class="section-header-row">
           <div>
@@ -88,6 +104,7 @@
         </div>
       </section>
 
+      <!-- Main workflow explanation -->
       <section class="card support-wide-card">
         <div class="section-header-row">
           <div>
@@ -131,6 +148,7 @@
         </div>
       </section>
 
+      <!-- Assessment form guidance -->
       <section class="card support-wide-card">
         <div class="section-header-row">
           <div>
@@ -204,6 +222,7 @@
         </div>
       </section>
 
+      <!-- Results interpretation guidance -->
       <section class="card support-wide-card">
         <div class="section-header-row">
           <div>
@@ -246,20 +265,25 @@
           </div>
         </div>
       </section>
-
     </section>
   </main>
 
+  <!-- --------------------------------------------------
+       Footer
+  --------------------------------------------------- -->
   <footer class="public-footer">
-  <div class="footer-container">
-    <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
-    <p>
-      Designed for hospitals, NHS settings, healthcare professionals, and
-      cardiology-focused clinical workflows.
-    </p>
-  </div>
-</footer>
+    <div class="footer-container">
+      <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
+      <p>
+        Designed for hospitals, NHS settings, healthcare professionals, and
+        cardiology-focused clinical workflows.
+      </p>
+    </div>
+  </footer>
 
+  <!-- --------------------------------------------------
+       Inline page helpers
+  --------------------------------------------------- -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const username = localStorage.getItem("cardiox_username") || "User";
@@ -276,8 +300,13 @@
       const dashboardLabel = isAdmin ? "User Management" : "Patient Management";
       const roleLabel = isAdmin ? "Admin" : "Clinician";
 
-      if (navUserText) navUserText.textContent = username;
-      if (roleText) roleText.textContent = roleLabel;
+      if (navUserText) {
+        navUserText.textContent = username;
+      }
+
+      if (roleText) {
+        roleText.textContent = roleLabel;
+      }
 
       if (dashboardNavLink) {
         dashboardNavLink.href = dashboardHref;

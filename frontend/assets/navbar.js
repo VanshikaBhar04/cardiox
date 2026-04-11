@@ -1,5 +1,17 @@
-// navbar.js
+// --------------------------------------------------
+// CardioX Navbar Script
+// --------------------------------------------------
+
+// Loads the shared navigation bar, updates it based on session state,
+// and highlights the active page for a clearer user experience.
+
+
+// --------------------------------------------------
+// Navbar loading
+// --------------------------------------------------
+
 function loadNavbar() {
+  // Loads the shared navbar HTML into the current page
   const navbarContainer = document.getElementById("navbarContainer");
   if (!navbarContainer) return;
 
@@ -19,7 +31,13 @@ function loadNavbar() {
     });
 }
 
+
+// --------------------------------------------------
+// Navbar initialisation
+// --------------------------------------------------
+
 function initialiseNavbar() {
+  // Reads session data and updates navbar links for the current user state
   const token = localStorage.getItem("cardiox_token");
   const role = localStorage.getItem("cardiox_role");
   const username = localStorage.getItem("cardiox_username") || "User";
@@ -59,12 +77,9 @@ function initialiseNavbar() {
 
     if (logoutBtn) {
       logoutBtn.classList.remove("hidden");
-      logoutBtn.onclick = () => {
-        localStorage.removeItem("cardiox_token");
-        localStorage.removeItem("cardiox_role");
-        localStorage.removeItem("cardiox_username");
-        window.location.replace("login.html");
-      };
+
+      // Uses centralised logout logic from session.js
+      logoutBtn.onclick = logoutUser;
     }
   } else {
     protectedLinks.forEach((link) => link.classList.add("hidden"));
@@ -79,11 +94,18 @@ function initialiseNavbar() {
   highlightActiveLink();
 }
 
+
+// --------------------------------------------------
+// Active link highlighting
+// --------------------------------------------------
+
 function highlightActiveLink() {
+  // Highlights the current page in the navigation bar
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
 
   document.querySelectorAll(".app-nav-link, .nav-login-btn, .nav-signup-btn").forEach((link) => {
     const href = link.getAttribute("href");
+
     if (href === currentPage) {
       link.classList.add("active");
     } else {
@@ -91,5 +113,10 @@ function highlightActiveLink() {
     }
   });
 }
+
+
+// --------------------------------------------------
+// Initial page load
+// --------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", loadNavbar);

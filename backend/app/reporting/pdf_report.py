@@ -1,28 +1,49 @@
-from io import BytesIO
+# --------------------------------------------------
+# CardioX PDF Report Builder
+# --------------------------------------------------
+
+# Generates clinician-facing and patient-facing PDF reports
+# for cardiovascular assessment results using ReportLab.
+
 from datetime import datetime
+from io import BytesIO
+
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import (
-    SimpleDocTemplate,
     Paragraph,
+    SimpleDocTemplate,
     Spacer,
     Table,
     TableStyle,
 )
 
 
+# --------------------------------------------------
+# Formatting Helpers
+# --------------------------------------------------
+
 def safe(value, fallback="—"):
+    """
+    Returns a printable fallback for empty or missing values
+    so reports remain clean and readable.
+    """
     if value is None or value == "":
         return fallback
     return str(value)
 
 
 def format_dt(value: str) -> str:
+    """
+    Formats ISO datetime strings into a clinician-friendly
+    day/month/year and time format for reports.
+    """
     if not value:
         return "—"
+
     try:
         dt = datetime.fromisoformat(value)
         return dt.strftime("%d/%m/%Y %H:%M:%S")
@@ -31,6 +52,10 @@ def format_dt(value: str) -> str:
 
 
 def nice_feature_name(name: str) -> str:
+    """
+    Converts raw model feature names into clearer report labels
+    for clinical readability.
+    """
     mapping = {
         "age": "Age",
         "sex": "Sex",
@@ -49,7 +74,29 @@ def nice_feature_name(name: str) -> str:
     return mapping.get(name, name.replace("_", " ").title())
 
 
+def risk_band_color(risk_band: str):
+    """
+    Maps risk band labels to consistent colours for visual emphasis
+    in the exported PDF summary tables.
+    """
+    risk_band = (risk_band or "").lower()
+
+    if risk_band == "high":
+        return colors.HexColor("#dc2626")
+    if risk_band == "moderate":
+        return colors.HexColor("#f59e0b")
+    return colors.HexColor("#16a34a")
+
+
+# --------------------------------------------------
+# Style Definitions
+# --------------------------------------------------
+
 def build_styles():
+    """
+    Defines the shared CardioX PDF text styles used across
+    both patient and clinician reports.
+    """
     styles = getSampleStyleSheet()
 
     styles.add(
@@ -118,7 +165,15 @@ def build_styles():
     return styles
 
 
+# --------------------------------------------------
+# Table Builders
+# --------------------------------------------------
+
 def build_info_table(rows):
+    """
+    Creates a shared two-column information table used for
+    patient details, structured inputs, and report summaries.
+    """
     table = Table(rows, colWidths=[55 * mm, 115 * mm])
     table.setStyle(
         TableStyle(
@@ -142,16 +197,15 @@ def build_info_table(rows):
     return table
 
 
-def risk_band_color(risk_band: str):
-    risk_band = (risk_band or "").lower()
-    if risk_band == "high":
-        return colors.HexColor("#dc2626")
-    if risk_band == "moderate":
-        return colors.HexColor("#f59e0b")
-    return colors.HexColor("#16a34a")
-
+# --------------------------------------------------
+# Patient Report Builder
+# --------------------------------------------------
 
 def build_patient_report(story, styles, clinician_name, patient, assessment, advice):
+    """
+    Builds a simplified patient-facing report with a clear summary,
+    practical explanation, and supportive next-step guidance.
+    """
     story.append(Paragraph("CardioX Patient Report", styles["CardioXTitle"]))
     story.append(
         Paragraph(
@@ -215,6 +269,7 @@ def build_patient_report(story, styles, clinician_name, patient, assessment, adv
 
     story.append(Spacer(1, 8))
     story.append(Paragraph("Helpful next steps", styles["CardioXSection"]))
+
     for item in advice[:4]:
         story.append(
             Paragraph(
@@ -233,7 +288,15 @@ def build_patient_report(story, styles, clinician_name, patient, assessment, adv
     )
 
 
+# --------------------------------------------------
+# Clinician Report Builder
+# --------------------------------------------------
+
 def build_clinician_report(story, styles, clinician_name, patient, assessment, explainability, advice):
+    """
+    Builds a detailed clinician-facing report including structured
+    inputs, model output, SHAP explanation, and personalised advice.
+    """
     story.append(Paragraph("CardioX Clinician Report", styles["CardioXTitle"]))
     story.append(
         Paragraph(
@@ -328,6 +391,7 @@ def build_clinician_report(story, styles, clinician_name, patient, assessment, e
 
     story.append(Spacer(1, 10))
     story.append(Paragraph("Personalised Advice", styles["CardioXSection"]))
+
     for item in advice[:5]:
         story.append(
             Paragraph(
@@ -349,6 +413,10 @@ def build_clinician_report(story, styles, clinician_name, patient, assessment, e
     )
 
 
+# --------------------------------------------------
+# Main PDF Export Entry Point
+# --------------------------------------------------
+
 def build_assessment_pdf(
     audience: str,
     clinician_name: str,
@@ -357,7 +425,12 @@ def build_assessment_pdf(
     explainability: dict,
     advice: list,
 ) -> bytes:
+    """
+    Generates the final CardioX PDF report as bytes, choosing either
+    a patient-facing or clinician-facing layout based on audience.
+    """
     buffer = BytesIO()
+
     doc = SimpleDocTemplate(
         buffer,
         pagesize=A4,
@@ -377,9 +450,18 @@ def build_assessment_pdf(
     if audience == "patient":
         build_patient_report(story, styles, clinician_name, patient, assessment, advice)
     else:
-        build_clinician_report(story, styles, clinician_name, patient, assessment, explainability, advice)
+        build_clinician_report(
+            story,
+            styles,
+            clinician_name,
+            patient,
+            assessment,
+            explainability,
+            advice,
+        )
 
     doc.build(story)
     pdf = buffer.getvalue()
     buffer.close()
+
     return pdf

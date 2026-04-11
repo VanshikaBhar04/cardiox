@@ -1,4 +1,21 @@
+// --------------------------------------------------
+// CardioX Signup Script
+// --------------------------------------------------
+
+// Handles clinician access requests, client-side validation,
+// field formatting, and submission to the backend approval workflow.
+
+
+// --------------------------------------------------
+// API configuration
+// --------------------------------------------------
+
 const SIGNUP_URL = "http://127.0.0.1:8000/auth/signup";
+
+
+// --------------------------------------------------
+// Signup page elements
+// --------------------------------------------------
 
 const signupForm = document.getElementById("signupForm");
 const signupStatus = document.getElementById("signupStatus");
@@ -11,37 +28,59 @@ const signupDepartment = document.getElementById("signupDepartment");
 const signupPassword = document.getElementById("signupPassword");
 const signupConfirmPassword = document.getElementById("signupConfirmPassword");
 
+
+// --------------------------------------------------
+// UI feedback helpers
+// --------------------------------------------------
+
 function setSignupStatus(message, isError = false) {
+  // Updates the signup status message for the user
   if (!signupStatus) return;
+
   signupStatus.textContent = message;
   signupStatus.style.color = isError ? "#dc2626" : "#475569";
 }
 
 function setSignupButtonLoading(isLoading) {
+  // Disables the submit button while the request is being processed
   if (!btnSignupSubmit) return;
+
   btnSignupSubmit.disabled = isLoading;
   btnSignupSubmit.textContent = isLoading ? "Submitting Request..." : "Request Access";
 }
 
+
+// --------------------------------------------------
+// Input formatting and validation helpers
+// --------------------------------------------------
+
 function capitaliseWords(value) {
+  // Formats names and department values into title case
   return value
     .trim()
     .toLowerCase()
     .split(/\s+/)
     .filter(Boolean)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
 
 function lettersOnlyName(value) {
+  // Validates that personal names contain alphabetic characters only
   return /^[A-Za-z]+(?:[ -][A-Za-z]+)*$/.test(value.trim());
 }
 
 function isStrongPassword(value) {
+  // Enforces the client-side password strength policy
   return /^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{6,}$/.test(value);
 }
 
-[signupFirstName, signupLastName].forEach(input => {
+
+// --------------------------------------------------
+// Input formatting interactions
+// --------------------------------------------------
+
+[signupFirstName, signupLastName].forEach((input) => {
   input?.addEventListener("blur", () => {
     input.value = capitaliseWords(input.value);
   });
@@ -54,6 +93,11 @@ signupDepartment?.addEventListener("blur", () => {
 signupEmail?.addEventListener("blur", () => {
   signupEmail.value = signupEmail.value.trim().toLowerCase();
 });
+
+
+// --------------------------------------------------
+// Signup form submission
+// --------------------------------------------------
 
 signupForm?.addEventListener("submit", async (e) => {
   e.preventDefault();

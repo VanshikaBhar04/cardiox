@@ -1,24 +1,40 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- --------------------------------------------------
+       Document metadata
+  --------------------------------------------------- -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <title>CardioX Admin Dashboard</title>
+
+  <!-- Shared stylesheet -->
   <link rel="stylesheet" href="assets/styles.css" />
+
+  <!-- Session helpers must load before any script that depends on them -->
   <script src="assets/session.js"></script>
+
+  <!-- Route protection for admin-only access -->
   <script>
     const sessionToken = localStorage.getItem("cardiox_token");
     const sessionRole = localStorage.getItem("cardiox_role");
+
     if (!sessionToken || sessionRole !== "admin") {
       window.location.replace("login.html");
     }
   </script>
 </head>
 <body>
+  <!-- --------------------------------------------------
+       Shared navigation
+  --------------------------------------------------- -->
+  <div id="navbarContainer"></div>
+  <script src="assets/navbar.js"></script>
 
-<div id="navbarContainer"></div>
-<script src="assets/navbar.js"></script>
-
+  <!-- --------------------------------------------------
+       Main admin dashboard
+  --------------------------------------------------- -->
   <div class="container clinician-dashboard-container">
     <header class="header app-page-header dashboard-hero">
       <div class="dashboard-hero-text">
@@ -30,6 +46,7 @@
       </div>
     </header>
 
+    <!-- Dashboard summary cards -->
     <section class="dashboard-stats-grid admin-stats-grid">
       <div class="card stat-card glass-accent">
         <div class="stat-label">Current Users</div>
@@ -50,66 +67,67 @@
       </div>
     </section>
 
+    <!-- Create user section -->
     <section class="card dashboard-card admin-section-card">
-  <div class="section-header-row admin-section-header">
-    <div>
-      <h2>Create User Account</h2>
-      <p class="section-subtext">Create a new admin or staff account directly from the dashboard.</p>
-    </div>
-  </div>
+      <div class="section-header-row admin-section-header">
+        <div>
+          <h2>Create User Account</h2>
+          <p class="section-subtext">Create a new admin or staff account directly from the dashboard.</p>
+        </div>
+      </div>
 
-  <form id="createUserForm" class="form-grid dashboard-form-grid admin-edit-form">
-    <label>
-      Username
-      <input id="createUsername" type="text" required />
-    </label>
+      <form id="createAUserForm" class="form-grid dashboard-form-grid admin-edit-form">
+        <label>
+          Username
+          <input id="createUsername" type="text" required />
+        </label>
 
-    <label>
-      Password
-      <input id="createPassword" type="password" required />
-    </label>
+        <label>
+          Password
+          <input id="createPassword" type="password" required />
+        </label>
 
-    <label>
-      First Name
-      <input id="createFirstName" type="text" required />
-    </label>
+        <label>
+          First Name
+          <input id="createFirstName" type="text" required />
+        </label>
 
-    <label>
-      Last Name
-      <input id="createLastName" type="text" required />
-    </label>
+        <label>
+          Last Name
+          <input id="createLastName" type="text" required />
+        </label>
 
-    <label>
-      Email
-      <input id="createEmail" type="email" required />
-    </label>
+        <label>
+          Email
+          <input id="createEmail" type="email" required />
+        </label>
 
-    <label>
-      Department / Ward
-      <input id="createDepartment" type="text" required />
-    </label>
+        <label>
+          Department / Ward
+          <input id="createDepartment" type="text" required />
+        </label>
 
-    <label>
-      Role
-      <select id="createRole" required>
-        <option value="admin">Admin</option>
-        <option value="clinician">Clinician</option>
-        <option value="manager">Manager</option>
-        <option value="employee">Employee</option>
-        <option value="it_technician">IT Technician</option>
-      </select>
-    </label>
+        <label>
+          Role
+          <select id="createRole" required>
+            <option value="admin">Admin</option>
+            <option value="clinician">Clinician</option>
+            <option value="manager">Manager</option>
+            <option value="employee">Employee</option>
+            <option value="it_technician">IT Technician</option>
+          </select>
+        </label>
 
-    <div class="actions admin-edit-actions">
-      <button type="submit" class="primary">Create User</button>
-    </div>
+        <div class="actions admin-edit-actions">
+          <button type="submit" class="primary">Create User</button>
+        </div>
 
-    <p id="createUserStatus" class="status"></p>
-  </form>
-</section>
+        <p id="createUserStatus" class="status"></p>
+      </form>
+    </section>
 
     <div class="admin-sections-stack">
-
+      <!-- Current users section -->
       <section class="card dashboard-card admin-section-card">
         <div class="section-header-row admin-section-header">
           <div>
@@ -134,6 +152,7 @@
                 <th>Actions</th>
               </tr>
             </thead>
+
             <tbody id="userTableBody">
               <tr>
                 <td colspan="6" class="empty-cell">No users loaded yet.</td>
@@ -143,6 +162,7 @@
         </div>
       </section>
 
+      <!-- Edit user section -->
       <section class="card dashboard-card admin-section-card" id="editUserSection" style="display:none;">
         <div class="section-header-row admin-section-header">
           <div>
@@ -185,10 +205,11 @@
             <button id="btnCancelUserEdit" type="button" class="secondary">Cancel</button>
           </div>
 
-          <p id="adminStatus" class="status"></p>
+          <p id="adminCurrentStatus" class="status"></p>
         </form>
       </section>
 
+      <!-- Pending approval requests section -->
       <section class="card dashboard-card admin-section-card">
         <div class="section-header-row admin-section-header">
           <div>
@@ -214,6 +235,7 @@
                 <th>Deny</th>
               </tr>
             </thead>
+
             <tbody id="pendingTableBody">
               <tr>
                 <td colspan="7" class="empty-cell">No pending requests loaded yet.</td>
@@ -223,6 +245,7 @@
         </div>
       </section>
 
+      <!-- Audit logs section -->
       <section class="card dashboard-card admin-section-card">
         <div class="section-header-row admin-section-header">
           <div>
@@ -246,6 +269,7 @@
                 <th>Details</th>
               </tr>
             </thead>
+
             <tbody id="auditTableBody">
               <tr>
                 <td colspan="5" class="empty-cell">No audit logs loaded yet.</td>
@@ -254,25 +278,33 @@
           </table>
         </div>
       </section>
-
     </div>
   </div>
 
+  <!-- --------------------------------------------------
+       Footer
+  --------------------------------------------------- -->
   <footer class="public-footer">
-  <div class="footer-container">
-    <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
-    <p>
-      Designed for hospitals, NHS settings, healthcare professionals, and
-      cardiology-focused clinical workflows.
-    </p>
-  </div>
-</footer>
+    <div class="footer-container">
+      <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
+      <p>
+        Designed for hospitals, NHS settings, healthcare professionals, and
+        cardiology-focused clinical workflows.
+      </p>
+    </div>
+  </footer>
 
+  <!-- --------------------------------------------------
+       Inline page helpers
+  --------------------------------------------------- -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const username = localStorage.getItem("cardiox_username") || "User";
       const navUserText = document.getElementById("navUserText");
-      if (navUserText) navUserText.textContent = username;
+
+      if (navUserText) {
+        navUserText.textContent = username;
+      }
 
       const btnLogout = document.getElementById("btnLogout");
       if (btnLogout) {
@@ -283,6 +315,7 @@
     });
   </script>
 
+  <!-- Page-specific script -->
   <script src="assets/admin.js" defer></script>
 </body>
 </html>

@@ -1,13 +1,24 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- --------------------------------------------------
+       Document metadata
+  --------------------------------------------------- -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <title>CardioX Clinician Dashboard</title>
+
+  <!-- Shared stylesheet -->
   <link rel="stylesheet" href="assets/styles.css" />
+
+  <!-- Session helpers must load before any script that depends on them -->
   <script src="assets/session.js"></script>
+
+  <!-- Route protection for clinician-only access -->
   <script>
     const role = localStorage.getItem("cardiox_role");
+
     if (!localStorage.getItem("cardiox_token") || role !== "clinician") {
       window.location.replace("login.html");
     }
@@ -15,9 +26,15 @@
 </head>
 
 <body>
- <div id="navbarContainer"></div>
-<script src="assets/navbar.js"></script>
+  <!-- --------------------------------------------------
+       Shared navigation
+  --------------------------------------------------- -->
+  <div id="navbarContainer"></div>
+  <script src="assets/navbar.js"></script>
 
+  <!-- --------------------------------------------------
+       Main clinician dashboard
+  --------------------------------------------------- -->
   <div class="container clinician-dashboard-container">
     <header class="header app-page-header dashboard-hero">
       <div class="dashboard-hero-text">
@@ -26,6 +43,7 @@
       </div>
     </header>
 
+    <!-- Dashboard summary cards -->
     <section class="dashboard-stats-grid">
       <div class="card stat-card glass-accent">
         <div class="stat-label">Patient Records</div>
@@ -47,8 +65,9 @@
     </section>
 
     <section class="dashboard-main-grid">
+      <!-- LEFT COLUMN -->
       <div class="dashboard-main-left">
-
+        <!-- Patient records section -->
         <section class="card dashboard-card">
           <div class="section-header-row">
             <div>
@@ -84,6 +103,7 @@
                   <th>Sex</th>
                 </tr>
               </thead>
+
               <tbody id="patientTableBody">
                 <tr>
                   <td colspan="5" class="empty-cell">No patients loaded yet.</td>
@@ -98,6 +118,7 @@
           </div>
         </section>
 
+        <!-- Add patient section -->
         <section class="card dashboard-card">
           <div class="section-header-row">
             <div>
@@ -135,11 +156,11 @@
             <p id="addPatientStatus" class="status"></p>
           </form>
         </section>
-
       </div>
 
+      <!-- RIGHT COLUMN -->
       <aside class="dashboard-main-right">
-
+        <!-- Selected patient panel -->
         <section class="card dashboard-card" id="selectedPatientPanel">
           <div class="section-header-row">
             <div>
@@ -161,6 +182,7 @@
           <p class="patient-side-note">Select a patient from the records table to enable assessment.</p>
         </section>
 
+        <!-- Assessment history section -->
         <section class="card dashboard-card" id="assessmentHistorySection" style="display:none;">
           <div class="section-header-row">
             <div>
@@ -174,6 +196,7 @@
           </div>
         </section>
 
+        <!-- Edit patient section -->
         <section class="card dashboard-card edit-patient-card" id="editPatientSection" style="display:none;">
           <div class="section-header-row">
             <div>
@@ -211,26 +234,34 @@
             <p id="editPatientStatus" class="status"></p>
           </form>
         </section>
-
       </aside>
     </section>
   </div>
 
+  <!-- --------------------------------------------------
+       Footer
+  --------------------------------------------------- -->
   <footer class="public-footer">
-  <div class="footer-container">
-    <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
-    <p>
-      Designed for hospitals, NHS settings, healthcare professionals, and
-      cardiology-focused clinical workflows.
-    </p>
-  </div>
-</footer>
+    <div class="footer-container">
+      <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
+      <p>
+        Designed for hospitals, NHS settings, healthcare professionals, and
+        cardiology-focused clinical workflows.
+      </p>
+    </div>
+  </footer>
 
+  <!-- --------------------------------------------------
+       Inline page helpers
+  --------------------------------------------------- -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const username = localStorage.getItem("cardiox_username") || "User";
       const navUserText = document.getElementById("navUserText");
-      if (navUserText) navUserText.textContent = username;
+
+      if (navUserText) {
+        navUserText.textContent = username;
+      }
 
       const btnLogout = document.getElementById("btnLogout");
       if (btnLogout) {
@@ -240,8 +271,8 @@
       }
     });
   </script>
-  
 
+  <!-- Page-specific script -->
   <script src="assets/clinician.js" defer></script>
 </body>
 </html>

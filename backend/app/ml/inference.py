@@ -1,29 +1,41 @@
-import joblib
-import pandas as pd
-from pathlib import Path
+# --------------------------------------------------
+# CardioX Inference, Explainability, and Advice Engine
+# --------------------------------------------------
 
-import shap
-import numpy as np
+# This module loads the trained machine learning model and provides:
+# - cardiovascular risk prediction
+# - SHAP-based local explainability
+# - source-backed personalised advice generation
+
+from pathlib import Path
 from typing import Any, Optional
 
+import joblib
+import numpy as np
+import pandas as pd
+import shap
 
-# Path to trained Machine Learning Model + navigates up to find the saved model artifact
+
+# --------------------------------------------------
+# Model Loading
+# --------------------------------------------------
+
+# Path to the trained machine learning model artifact
 MODEL_PATH = Path(__file__).resolve().parents[3] / "ml" / "artifacts" / "final_model.joblib"
 
-# Load model once at start up + avoids reloading the model on every prediction
+# Load the model once at startup to avoid repeated disk reads during inference
 _model = joblib.load(MODEL_PATH)
 
 
 # --------------------------------------------------
-# Risk helpers
+# Risk Helpers
 # --------------------------------------------------
 
 def risk_band(risk_percent: float) -> str:
     """
-    Improved risk band thresholds for better spread of predictions.
-    These are prototype thresholds (not clinical standards).
+    Maps a predicted risk percentage into a UI-friendly band.
+    These are prototype thresholds and not clinical standards.
     """
-
     if risk_percent < 40:
         return "Low"
     if risk_percent < 60:
@@ -33,31 +45,31 @@ def risk_band(risk_percent: float) -> str:
 
 def predict_risk(patient: dict) -> dict:
     """
-    patient: dict of raw feature values (same names as dataset columns, excluding target)
-    returns: risk percent + band
+    Accepts raw patient feature values using the same names as the dataset
+    and returns a risk percentage with a corresponding display band.
     """
     X = pd.DataFrame([patient])
 
-    # Get probability for the positive class (Class Index 1)
+    # Predict probability for the positive class
     prob = float(_model.predict_proba(X)[:, 1][0])
 
-    # Convert probability to percentage
+    # Convert probability to a percentage for UI display
     risk_percent = prob * 100
 
     return {
         "risk_percent": round(risk_percent, 2),
-        "risk_band": risk_band(risk_percent)
+        "risk_band": risk_band(risk_percent),
     }
 
 
 # --------------------------------------------------
-# SHAP helpers
+# SHAP Normalisation Helpers
 # --------------------------------------------------
 
 def _extract_positive_class_shap(shap_values: Any) -> np.ndarray:
     """
-    Normalize SHAP output across versions/models into a 1D array (n_features,)
-    for the positive class (class 1 where possible).
+    Normalises SHAP outputs across library versions and model types
+    into a 1D array of feature contributions for the positive class.
     """
     if isinstance(shap_values, list):
         mat = shap_values[1] if len(shap_values) > 1 else shap_values[0]
@@ -81,19 +93,26 @@ def _extract_positive_class_shap(shap_values: Any) -> np.ndarray:
 
 def _extract_expected_value(expected_value: Any) -> float:
     """
-    Normalize expected_value across versions/models into a float
-    for the positive class where possible.
+    Normalises SHAP expected values across versions and model types
+    into a single float for the positive class where available.
     """
     ev = expected_value
+
     if isinstance(ev, (list, np.ndarray)):
         ev = np.asarray(ev).flatten()
         return float(ev[1]) if ev.size > 1 else float(ev[0])
+
     return float(ev)
 
 
+# --------------------------------------------------
+# Feature Name Formatting Helpers
+# --------------------------------------------------
+
 def _prettify_feature_name(name: str) -> str:
     """
-    Convert raw / transformed feature names into more readable UI labels.
+    Converts raw or transformed feature names into more readable labels
+    for the clinician-facing explainability UI.
     """
     if not name:
         return "Unknown Feature"
@@ -111,7 +130,7 @@ def _prettify_feature_name(name: str) -> str:
         "oldpeak": "Oldpeak",
         "slope": "ST Segment Slope",
         "ca": "Major Vessels (CA)",
-        "thal": "Thal"
+        "thal": "Thal",
     }
 
     raw = name
@@ -133,18 +152,31 @@ def _prettify_feature_name(name: str) -> str:
 
 def _raw_feature_key_from_transformed(name: str) -> Optional[str]:
     """
-    Attempt to map transformed feature names back to a raw patient field.
+    Attempts to map transformed feature names back to the original
+    raw patient field name used in the input payload.
     """
     if not name:
         return None
 
     raw = name
+
     if "__" in raw:
         raw = raw.split("__", 1)[1]
 
     known_keys = [
-        "age", "sex", "cp", "trestbps", "chol", "fbs",
-        "restecg", "thalch", "exang", "oldpeak", "slope", "ca", "thal"
+        "age",
+        "sex",
+        "cp",
+        "trestbps",
+        "chol",
+        "fbs",
+        "restecg",
+        "thalch",
+        "exang",
+        "oldpeak",
+        "slope",
+        "ca",
+        "thal",
     ]
 
     for key in known_keys:
@@ -154,15 +186,19 @@ def _raw_feature_key_from_transformed(name: str) -> Optional[str]:
     return None
 
 
+# --------------------------------------------------
+# SHAP Feature Selection Helpers
+# --------------------------------------------------
+
 def _select_top_unique_features(
     feature_names: list[str],
     shap_values: np.ndarray,
     patient: dict,
-    top_k: int
+    top_k: int,
 ) -> list[dict]:
     """
-    Select top SHAP features while avoiding duplicate transformed columns
-    from the same raw feature dominating the explanation.
+    Selects the most important SHAP features while avoiding multiple
+    transformed columns from the same raw feature dominating the output.
     """
     idx_sorted = np.argsort(np.abs(shap_values))[::-1]
 
@@ -185,7 +221,7 @@ def _select_top_unique_features(
             "display_feature": _prettify_feature_name(raw_name),
             "value": patient.get(base_key),
             "shap": round(s, 4),
-            "direction": "increases" if s > 0 else "decreases"
+            "direction": "increases" if s > 0 else "decreases",
         })
 
         if len(top_factors) >= top_k:
@@ -194,24 +230,28 @@ def _select_top_unique_features(
     return top_factors
 
 
+# --------------------------------------------------
+# Explainability Logic
+# --------------------------------------------------
+
 def explain_risk(patient: dict, top_k: int = 6) -> dict:
     """
-    SHAP local explanation for a single patient.
+    Generates a SHAP local explanation for a single patient.
 
-    Works for:
-      - Plain RandomForestClassifier
-      - sklearn Pipeline with preprocessing (e.g., OneHotEncoder) + RandomForestClassifier
+    Supported model forms:
+    - plain RandomForestClassifier
+    - sklearn Pipeline with preprocessing + classifier
 
     Returns:
       {
         "base_value": float,
         "top_factors": [
             {
-              "feature": str,
-              "display_feature": str,
-              "value": Any|None,
-              "shap": float,
-              "direction": "increases"|"decreases"
+                "feature": str,
+                "display_feature": str,
+                "value": Any | None,
+                "shap": float,
+                "direction": "increases" | "decreases"
             }
         ]
       }
@@ -246,10 +286,13 @@ def explain_risk(patient: dict, top_k: int = 6) -> dict:
                 feature_names=feature_names,
                 shap_values=shap_pos,
                 patient=patient,
-                top_k=top_k
+                top_k=top_k,
             )
 
-            return {"base_value": round(base_val, 4), "top_factors": top_factors}
+            return {
+                "base_value": round(base_val, 4),
+                "top_factors": top_factors,
+            }
 
         explainer = shap.Explainer(_model)
         sv = explainer(X_raw)
@@ -266,15 +309,24 @@ def explain_risk(patient: dict, top_k: int = 6) -> dict:
         feature_names=feature_names,
         shap_values=shap_pos,
         patient=patient,
-        top_k=top_k
+        top_k=top_k,
     )
 
-    return {"base_value": round(base_val, 4), "top_factors": top_factors}
+    return {
+        "base_value": round(base_val, 4),
+        "top_factors": top_factors,
+    }
 
 
-def _format_shap_explainer_output(sv, X_raw: pd.DataFrame, patient: dict, top_k: int) -> dict:
+def _format_shap_explainer_output(
+    sv,
+    X_raw: pd.DataFrame,
+    patient: dict,
+    top_k: int,
+) -> dict:
     """
-    Helper for shap.Explainer outputs (fallback path).
+    Formats outputs from shap.Explainer into the same structure
+    used by the main explainability response.
     """
     values = np.asarray(sv.values)
 
@@ -293,24 +345,32 @@ def _format_shap_explainer_output(sv, X_raw: pd.DataFrame, patient: dict, top_k:
         feature_names=feature_names,
         shap_values=shap_vals,
         patient=patient,
-        top_k=top_k
+        top_k=top_k,
     )
 
-    return {"base_value": round(base_val, 4), "top_factors": top_factors}
+    return {
+        "base_value": round(base_val, 4),
+        "top_factors": top_factors,
+    }
 
 
 # --------------------------------------------------
-# Source-backed advice generation
+# Source-Backed Advice Generation
 # --------------------------------------------------
 
 def generate_advice(patient: dict, top_factors: list[dict]) -> list[dict]:
     """
-    Generate model-informed but source-backed advice.
-    Advice is prioritised by features that increased risk in SHAP.
+    Generates model-informed but source-backed advice.
+    Advice is prioritised using SHAP features that increased risk.
 
-    Each item is UI-ready and includes source metadata.
+    Each item is formatted for the UI and includes source metadata.
     """
-    increasing = {f.get("feature") for f in top_factors if f.get("direction") == "increases"}
+    increasing = {
+        f.get("feature")
+        for f in top_factors
+        if f.get("direction") == "increases"
+    }
+
     advice: list[dict] = []
 
     def add(
@@ -320,7 +380,7 @@ def generate_advice(patient: dict, top_factors: list[dict]) -> list[dict]:
         action: str,
         source_name: str,
         source_label: str,
-        source_url: str
+        source_url: str,
     ):
         advice.append({
             "key": key,
@@ -329,7 +389,7 @@ def generate_advice(patient: dict, top_factors: list[dict]) -> list[dict]:
             "action": action,
             "source_name": source_name,
             "source_label": source_label,
-            "source_url": source_url
+            "source_url": source_url,
         })
 
     trestbps = patient.get("trestbps")
@@ -347,7 +407,7 @@ def generate_advice(patient: dict, top_factors: list[dict]) -> list[dict]:
             action="Encourage blood pressure review, lifestyle optimisation, regular monitoring, and clinical follow-up in line with local care pathways.",
             source_name="NICE",
             source_label="NICE NG238 cardiovascular prevention guidance",
-            source_url="https://www.nice.org.uk/guidance/ng238"
+            source_url="https://www.nice.org.uk/guidance/ng238",
         )
 
     if chol is not None and float(chol) >= 240:
@@ -358,7 +418,7 @@ def generate_advice(patient: dict, top_factors: list[dict]) -> list[dict]:
             action="Encourage reduction of saturated fat intake, improvement of diet quality, and regular physical activity. Consider whether lipid management review is clinically appropriate.",
             source_name="NHS",
             source_label="NHS guidance on lowering cholesterol",
-            source_url="https://www.nhs.uk/conditions/high-cholesterol/how-to-lower-your-cholesterol/"
+            source_url="https://www.nhs.uk/conditions/high-cholesterol/how-to-lower-your-cholesterol/",
         )
 
     if fbs == "true":
@@ -369,7 +429,7 @@ def generate_advice(patient: dict, top_factors: list[dict]) -> list[dict]:
             action="Consider appropriate follow-up of glycaemic status and reinforce dietary, activity, and weight-management advice where clinically relevant.",
             source_name="NHS",
             source_label="NHS cardiovascular prevention guidance",
-            source_url="https://www.nhs.uk/conditions/coronary-heart-disease/prevention/"
+            source_url="https://www.nhs.uk/conditions/coronary-heart-disease/prevention/",
         )
 
     if exang == "true":
@@ -380,7 +440,7 @@ def generate_advice(patient: dict, top_factors: list[dict]) -> list[dict]:
             action="Review symptom history carefully and consider whether further cardiovascular evaluation is appropriate within the patient’s wider clinical context.",
             source_name="NICE",
             source_label="NICE cardiovascular risk and prevention guidance",
-            source_url="https://www.nice.org.uk/guidance/ng238"
+            source_url="https://www.nice.org.uk/guidance/ng238",
         )
 
     if thalch is not None and float(thalch) < 120:
@@ -391,7 +451,7 @@ def generate_advice(patient: dict, top_factors: list[dict]) -> list[dict]:
             action="Encourage clinician-led review of exercise tolerance and consider graded lifestyle activity advice where appropriate.",
             source_name="American Heart Association",
             source_label="AHA physical activity and heart-health guidance",
-            source_url="https://www.heart.org/en/healthy-living/fitness/fitness-basics/aha-recs-for-physical-activity-in-adults"
+            source_url="https://www.heart.org/en/healthy-living/fitness/fitness-basics/aha-recs-for-physical-activity-in-adults",
         )
 
     if oldpeak is not None and float(oldpeak) >= 2:
@@ -402,11 +462,13 @@ def generate_advice(patient: dict, top_factors: list[dict]) -> list[dict]:
             action="Correlate this value with symptoms, ECG findings, and wider assessment results when determining the next clinical step.",
             source_name="NICE",
             source_label="NICE cardiovascular prevention and review guidance",
-            source_url="https://www.nice.org.uk/guidance/ng238"
+            source_url="https://www.nice.org.uk/guidance/ng238",
         )
 
+    # Prioritise advice linked to features that increased model risk
     advice.sort(key=lambda a: (0 if a["key"] in increasing else 1, a["title"]))
 
+    # Always include a general prevention item
     advice.append({
         "key": "general_prevention",
         "title": "Maintain heart-healthy lifestyle measures",
@@ -414,9 +476,10 @@ def generate_advice(patient: dict, top_factors: list[dict]) -> list[dict]:
         "action": "Encourage regular physical activity, a balanced heart-healthy diet, healthy weight, smoking avoidance, and appropriate routine follow-up.",
         "source_name": "American Heart Association",
         "source_label": "AHA adult physical activity and heart-health guidance",
-        "source_url": "https://www.heart.org/en/healthy-living/fitness/fitness-basics/aha-recs-for-physical-activity-in-adults"
+        "source_url": "https://www.heart.org/en/healthy-living/fitness/fitness-basics/aha-recs-for-physical-activity-in-adults",
     })
 
+    # Remove internal sorting key before returning UI-ready data
     for item in advice:
         item.pop("key", None)
 
@@ -424,17 +487,25 @@ def generate_advice(patient: dict, top_factors: list[dict]) -> list[dict]:
 
 
 # --------------------------------------------------
-# Combined helper
+# Combined Prediction + Explainability Helper
 # --------------------------------------------------
 
 def predict_with_explainability(patient: dict, top_k: int = 6) -> dict:
+    """
+    Convenience helper that returns both prediction output
+    and local explainability in a single response structure.
+    """
     pred = predict_risk(patient)
     xai = explain_risk(patient, top_k=top_k)
-    return {"prediction": pred, "explainability": xai}
+
+    return {
+        "prediction": pred,
+        "explainability": xai,
+    }
 
 
 # --------------------------------------------------
-# Local test
+# Local Test Example
 # --------------------------------------------------
 
 if __name__ == "__main__":
@@ -451,7 +522,7 @@ if __name__ == "__main__":
         "oldpeak": 2.3,
         "slope": "downsloping",
         "ca": 0.0,
-        "thal": "fixed defect"
+        "thal": "fixed defect",
     }
 
     prediction = predict_risk(example_patient)
@@ -461,5 +532,5 @@ if __name__ == "__main__":
     print({
         "prediction": prediction,
         "explainability": explanation,
-        "advice": advice
+        "advice": advice,
     })

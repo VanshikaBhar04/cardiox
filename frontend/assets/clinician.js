@@ -1,25 +1,53 @@
-// The base URL for the FastAPI backend
+// --------------------------------------------------
+// CardioX Clinician Dashboard Script
+// --------------------------------------------------
+
+// Handles clinician-side patient management, patient selection,
+// assessment history, and navigation to assessment workflows.
+
+
+// --------------------------------------------------
+// API configuration and authentication
+// --------------------------------------------------
+
+// Base URL for the FastAPI backend
 const API_BASE = "http://127.0.0.1:8000";
 
-// JWT Token saved at login
+// JWT token saved at login
 const token = localStorage.getItem("cardiox_token");
 
-// Status outputs
+
+// --------------------------------------------------
+// Status and feedback elements
+// --------------------------------------------------
+
 const statusEl = document.getElementById("status");
 const addPatientStatusEl = document.getElementById("addPatientStatus");
 const editPatientStatusEl = document.getElementById("editPatientStatus");
 
-// Patient + history UI
+
+// --------------------------------------------------
+// Patient details and assessment history UI
+// --------------------------------------------------
+
 const patientDetailsEl = document.getElementById("patientDetails");
 const assessmentHistorySection = document.getElementById("assessmentHistorySection");
 const assessmentHistoryEl = document.getElementById("assessmentHistory");
 
-// Top buttons
+
+// --------------------------------------------------
+// Top action buttons
+// --------------------------------------------------
+
 const btnLogout = document.getElementById("btnLogout");
 const btnStartAssessment = document.getElementById("btnStartAssessment");
 const btnDeletePatient = document.getElementById("btnDeletePatient");
 
-// Search/patient table elements
+
+// --------------------------------------------------
+// Search and patient table elements
+// --------------------------------------------------
+
 const searchForm = document.getElementById("searchForm");
 const searchQueryInput = document.getElementById("searchQuery");
 const patientTableBody = document.getElementById("patientTableBody");
@@ -27,14 +55,22 @@ const btnLoadAllPatients = document.getElementById("btnLoadAllPatients");
 const noResultsBox = document.getElementById("noResultsBox");
 const btnQuickAddPatient = document.getElementById("btnQuickAddPatient");
 
+
+// --------------------------------------------------
 // Add patient form elements
+// --------------------------------------------------
+
 const addPatientForm = document.getElementById("addPatientForm");
 const firstNameOfNewPatient = document.getElementById("firstNameOfNewPatient");
 const lastNameOfNewPatient = document.getElementById("lastNameOfNewPatient");
 const dateOfBirthOfNewPatient = document.getElementById("dateOfBirthOfNewPatient");
 const sexOfNewPatient = document.getElementById("sexOfNewPatient");
 
-// Edit patient elements
+
+// --------------------------------------------------
+// Edit patient form elements
+// --------------------------------------------------
+
 const editPatientSection = document.getElementById("editPatientSection");
 const editPatientForm = document.getElementById("editPatientForm");
 const editFirstName = document.getElementById("editFirstName");
@@ -42,51 +78,72 @@ const editLastName = document.getElementById("editLastName");
 const editDob = document.getElementById("editDob");
 const editSex = document.getElementById("editSex");
 
-// Currently selected patient
+
+// --------------------------------------------------
+// Client-side page state
+// --------------------------------------------------
+
+// Currently selected patient in the clinician dashboard
 let selectedPatient = null;
 
-// Store last search term
+// Stores the latest search term so the table can be refreshed consistently
 let lastSearchQuery = "";
 
-// For expanding to see more Assessments
+// Controls whether full assessment history is expanded
 let isAssessmentHistoryExpanded = false;
 
-// Build auth headers
+
+// --------------------------------------------------
+// Authentication helpers
+// --------------------------------------------------
+
 function authHeaders() {
+  // Builds authenticated headers for protected API requests
   return {
     "Content-Type": "application/json",
     "Authorization": `Bearer ${token}`
   };
 }
 
-// Force logout on auth issues
 function forceLogout() {
+  // Clears session data and redirects to the login page on auth failure
   localStorage.removeItem("cardiox_token");
   localStorage.removeItem("cardiox_role");
   localStorage.removeItem("cardiox_username");
   window.location.replace("login.html");
 }
 
-// Status helpers
+
+// --------------------------------------------------
+// Status message helpers
+// --------------------------------------------------
+
 function setStatus(msg, isError = false) {
   if (!statusEl) return;
+
   statusEl.textContent = msg;
   statusEl.style.color = isError ? "#dc2626" : "#475569";
 }
 
 function setAddPatientStatus(msg, isError = false) {
   if (!addPatientStatusEl) return;
+
   addPatientStatusEl.textContent = msg;
   addPatientStatusEl.style.color = isError ? "#dc2626" : "#475569";
 }
 
 function setEditPatientStatus(msg, isError = false) {
   if (!editPatientStatusEl) return;
+
   editPatientStatusEl.textContent = msg;
   editPatientStatusEl.style.color = isError ? "#dc2626" : "#475569";
 }
 
-// Validation helpers
+
+// --------------------------------------------------
+// Validation and formatting helpers
+// --------------------------------------------------
+
 function containsLettersOnly(value) {
   return /^[A-Za-z]+$/.test(value.trim());
 }
@@ -97,31 +154,55 @@ function toCapitalisedName(value) {
   return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
 }
 
-function formatBritishDate(isoDate) {
-  if (!isoDate) return "—";
-  const parts = isoDate.split("-");
-  if (parts.length !== 3) return isoDate;
-  return `${parts[2]}/${parts[1]}/${parts[0]}`;
-}
-
 function validateNameField(value, fieldLabel) {
+  // Validates patient names before create or update requests
   if (!value.trim()) {
     return `${fieldLabel} is required.`;
   }
+
   if (!containsLettersOnly(value)) {
     return `${fieldLabel} must contain letters only. Please retry.`;
   }
+
   return "";
 }
 
+function formatBritishDate(isoDate) {
+  // Converts ISO date values into a UK-friendly display format
+  if (!isoDate) return "—";
+
+  const parts = isoDate.split("-");
+  if (parts.length !== 3) return isoDate;
+
+  return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
+
+function formatDateTime(iso) {
+  // Formats stored timestamps for readable assessment history display
+  if (!iso) return "—";
+
+  const dt = iso.replace("T", " ").slice(0, 19);
+  const [datePart, timePart] = dt.split(" ");
+  if (!datePart) return iso;
+
+  const [year, month, day] = datePart.split("-");
+  return `${day}/${month}/${year}${timePart ? ` ${timePart}` : ""}`;
+}
+
 function formatRiskBandClass(band) {
+  // Returns inline styling for visual risk band emphasis
   if (band === "High") return "background: rgba(220, 38, 38, 0.12); color: #b91c1c;";
   if (band === "Moderate") return "background: rgba(245, 158, 11, 0.14); color: #b45309;";
   return "background: rgba(22, 163, 74, 0.12); color: #15803d;";
 }
 
-// Enable/disable assessment and delete buttons
+
+// --------------------------------------------------
+// Patient selection and UI state helpers
+// --------------------------------------------------
+
 function enableAssessmentButton(patient) {
+  // Enables or disables patient-specific actions based on selection state
   if (btnStartAssessment) {
     btnStartAssessment.disabled = !patient;
   }
@@ -131,27 +212,30 @@ function enableAssessmentButton(patient) {
   }
 }
 
-// Highlight selected row
 function highlightSelectedPatientRow(patientUid) {
-  document.querySelectorAll("#patientTableBody tr[data-uid]").forEach(row => {
+  // Visually highlights the selected patient in the table
+  document.querySelectorAll("#patientTableBody tr[data-uid]").forEach((row) => {
     row.classList.remove("patient-row-selected");
+
     if (row.dataset.uid === patientUid) {
       row.classList.add("patient-row-selected");
     }
   });
 }
 
-// Render selected patient summary
 function renderPatient(patient) {
+  // Renders the currently selected patient summary panel
   const selectedPatientBadge = document.getElementById("selectedPatientBadge");
 
   if (!patient) {
     if (patientDetailsEl) {
       patientDetailsEl.innerHTML = `<p class="note">No patient selected yet.</p>`;
     }
+
     if (selectedPatientBadge) {
       selectedPatientBadge.textContent = "None";
     }
+
     return;
   }
 
@@ -173,8 +257,8 @@ function renderPatient(patient) {
   }
 }
 
-// Show edit section with current patient
 function showEditPatient(patient) {
+  // Displays the edit form pre-filled with the selected patient's details
   if (!editPatientSection) return;
 
   editPatientSection.style.display = "block";
@@ -184,8 +268,8 @@ function showEditPatient(patient) {
   editSex.value = patient.sex || "";
 }
 
-// Reset selection UI
 function clearSelectedPatientUI() {
+  // Resets the selected patient area after deletion or initial page load
   selectedPatient = null;
   renderPatient(null);
 
@@ -196,7 +280,7 @@ function clearSelectedPatientUI() {
   enableAssessmentButton(null);
   hideAssessmentHistorySection();
 
-  document.querySelectorAll("#patientTableBody tr[data-uid]").forEach(row => {
+  document.querySelectorAll("#patientTableBody tr[data-uid]").forEach((row) => {
     row.classList.remove("patient-row-selected");
   });
 
@@ -207,19 +291,11 @@ function clearSelectedPatientUI() {
   setEditPatientStatus("");
 }
 
-// Format timestamp
-function formatDateTime(iso) {
-  if (!iso) return "—";
 
-  const dt = iso.replace("T", " ").slice(0, 19);
-  const [datePart, timePart] = dt.split(" ");
-  if (!datePart) return iso;
+// --------------------------------------------------
+// Assessment history section visibility
+// --------------------------------------------------
 
-  const [year, month, day] = datePart.split("-");
-  return `${day}/${month}/${year}${timePart ? ` ${timePart}` : ""}`;
-}
-
-// Show/hide assessment history
 function showAssessmentHistorySection() {
   if (assessmentHistorySection) {
     assessmentHistorySection.style.display = "block";
@@ -232,15 +308,24 @@ function hideAssessmentHistorySection() {
   }
 }
 
-// Welcome text
+
+// --------------------------------------------------
+// Profile and welcome message
+// --------------------------------------------------
+
 async function loadingTheWelcome() {
+  // Loads the clinician profile to personalise the dashboard heading
   try {
-    const res = await fetch(`${API_BASE}/profile/me`, { headers: authHeaders() });
+    const res = await fetch(`${API_BASE}/profile/me`, {
+      headers: authHeaders()
+    });
+
     if (!res.ok) return;
 
     const p = await res.json();
     const name = `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || p.username;
     const el = document.getElementById("welcomeTitle");
+
     if (el) {
       el.textContent = `Welcome, ${name}`;
     }
@@ -249,8 +334,13 @@ async function loadingTheWelcome() {
   }
 }
 
-// Load patient assessment history
+
+// --------------------------------------------------
+// Assessment history loading and rendering
+// --------------------------------------------------
+
 async function loadAssessmentHistory(patient_uid) {
+  // Retrieves all stored assessments for the selected patient
   if (!assessmentHistoryEl) return;
 
   assessmentHistoryEl.innerHTML = `<p class="note">Loading assessments…</p>`;
@@ -278,8 +368,8 @@ async function loadAssessmentHistory(patient_uid) {
   }
 }
 
-// Render assessment history list
 function renderAssessmentHistory(items) {
+  // Renders a condensed or expanded assessment history list
   if (!assessmentHistoryEl) return;
 
   showAssessmentHistorySection();
@@ -292,7 +382,7 @@ function renderAssessmentHistory(items) {
   const hasMultiple = items.length > 1;
   const assessmentsToShow = isAssessmentHistoryExpanded ? items : [items[0]];
 
-  const historyCards = assessmentsToShow.map(a => `
+  const historyCards = assessmentsToShow.map((a) => `
     <div class="history-item">
       <div class="assessment-history-main">
         <div class="history-meta">
@@ -332,16 +422,17 @@ function renderAssessmentHistory(items) {
     ${toggleButton}
   `;
 
-  document.querySelectorAll("[data-edit]").forEach(btn => {
+  document.querySelectorAll("[data-edit]").forEach((btn) => {
     btn.addEventListener("click", () => {
       if (!selectedPatient) return;
+
       const id = btn.getAttribute("data-edit");
       window.location.href =
         `assessment.html?patient_uid=${encodeURIComponent(selectedPatient.patient_uid)}&assessment_id=${encodeURIComponent(id)}`;
     });
   });
 
-  document.querySelectorAll("[data-del]").forEach(btn => {
+  document.querySelectorAll("[data-del]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       if (!selectedPatient) return;
 
@@ -350,10 +441,13 @@ function renderAssessmentHistory(items) {
       if (!ok) return;
 
       try {
-        const res = await fetch(`${API_BASE}/clinician/assessments/${encodeURIComponent(id)}`, {
-          method: "DELETE",
-          headers: authHeaders()
-        });
+        const res = await fetch(
+          `${API_BASE}/clinician/assessments/${encodeURIComponent(id)}`,
+          {
+            method: "DELETE",
+            headers: authHeaders()
+          }
+        );
 
         const data = await res.json().catch(() => ({}));
 
@@ -383,8 +477,13 @@ function renderAssessmentHistory(items) {
   }
 }
 
-// Fetch full patient by UID
+
+// --------------------------------------------------
+// Patient loading and table rendering
+// --------------------------------------------------
+
 async function fetchPatientByUid(patientUid) {
+  // Retrieves the full patient record when a table row is selected
   try {
     const res = await fetch(
       `${API_BASE}/clinician/patients/${encodeURIComponent(patientUid)}`,
@@ -409,8 +508,8 @@ async function fetchPatientByUid(patientUid) {
   }
 }
 
-// Render patient table
 function renderPatientTable(items) {
+  // Renders the patient search results table
   if (!patientTableBody) return;
 
   if (!items || items.length === 0) {
@@ -419,9 +518,11 @@ function renderPatientTable(items) {
         <td colspan="5" class="empty-cell">No matching patients found.</td>
       </tr>
     `;
+
     if (noResultsBox) {
       noResultsBox.style.display = "block";
     }
+
     return;
   }
 
@@ -429,7 +530,7 @@ function renderPatientTable(items) {
     noResultsBox.style.display = "none";
   }
 
-  patientTableBody.innerHTML = items.map(p => `
+  patientTableBody.innerHTML = items.map((p) => `
     <tr data-uid="${p.patient_uid}" class="patient-select-row">
       <td>${p.patient_uid}</td>
       <td>${p.first_name}</td>
@@ -444,13 +545,13 @@ function renderPatientTable(items) {
   }
 }
 
-// Keep compatibility if used elsewhere
+// Keeps compatibility if called elsewhere
 function renderSearchResults(items) {
   renderPatientTable(items);
 }
 
-// Refresh current search
 async function refreshSearchResults() {
+  // Reloads the visible patient table using the most recent search criteria
   const query = (lastSearchQuery || "").trim();
 
   let url = "";
@@ -479,8 +580,8 @@ async function refreshSearchResults() {
   }
 }
 
-// Load all patients
 async function loadAllPatients() {
+  // Loads the full patient list for the clinician dashboard
   setStatus("Loading patients...");
 
   try {
@@ -505,7 +606,11 @@ async function loadAllPatients() {
   }
 }
 
-// Search patient(s)
+
+// --------------------------------------------------
+// Search interactions
+// --------------------------------------------------
+
 searchForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -544,7 +649,11 @@ searchForm?.addEventListener("submit", async (e) => {
   }
 });
 
-// Table row selection via event delegation
+
+// --------------------------------------------------
+// Patient table selection
+// --------------------------------------------------
+
 patientTableBody?.addEventListener("click", async (e) => {
   const row = e.target.closest("tr[data-uid]");
   if (!row) return;
@@ -575,6 +684,7 @@ patientTableBody?.addEventListener("click", async (e) => {
     if (assessmentHistoryEl) {
       assessmentHistoryEl.innerHTML = `<p class="note">Loading assessments…</p>`;
     }
+
     await loadAssessmentHistory(selectedPatient.patient_uid);
   } catch (err) {
     console.error("Error selecting patient:", err);
@@ -582,21 +692,30 @@ patientTableBody?.addEventListener("click", async (e) => {
   }
 });
 
+
+// --------------------------------------------------
+// Input formatting interactions
+// --------------------------------------------------
+
 // Auto-format add patient names on blur
-[firstNameOfNewPatient, lastNameOfNewPatient].forEach(input => {
+[firstNameOfNewPatient, lastNameOfNewPatient].forEach((input) => {
   input?.addEventListener("blur", () => {
     input.value = toCapitalisedName(input.value);
   });
 });
 
 // Auto-format edit patient names on blur
-[editFirstName, editLastName].forEach(input => {
+[editFirstName, editLastName].forEach((input) => {
   input?.addEventListener("blur", () => {
     input.value = toCapitalisedName(input.value);
   });
 });
 
-// Create patient
+
+// --------------------------------------------------
+// Create patient workflow
+// --------------------------------------------------
+
 addPatientForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -668,7 +787,11 @@ addPatientForm?.addEventListener("submit", async (e) => {
   }
 });
 
-// Update patient
+
+// --------------------------------------------------
+// Update patient workflow
+// --------------------------------------------------
+
 editPatientForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -736,13 +859,23 @@ editPatientForm?.addEventListener("submit", async (e) => {
   }
 });
 
-// Start assessment
+
+// --------------------------------------------------
+// Assessment navigation
+// --------------------------------------------------
+
 btnStartAssessment?.addEventListener("click", () => {
+  // Navigates to the assessment workflow for the selected patient
   if (!selectedPatient) return;
+
   window.location.href = `assessment.html?patient_uid=${encodeURIComponent(selectedPatient.patient_uid)}`;
 });
 
-// Delete patient
+
+// --------------------------------------------------
+// Delete patient workflow
+// --------------------------------------------------
+
 btnDeletePatient?.addEventListener("click", async () => {
   if (!selectedPatient) {
     return setStatus("Select a patient first.", true);
@@ -792,19 +925,26 @@ btnDeletePatient?.addEventListener("click", async () => {
   }
 });
 
-// Show all patients
+
+// --------------------------------------------------
+// General button actions
+// --------------------------------------------------
+
 btnLoadAllPatients?.addEventListener("click", loadAllPatients);
 
-// Quick add patient button
 btnQuickAddPatient?.addEventListener("click", () => {
+  // Scrolls to the add patient form for faster workflow access
   window.scrollTo({ top: 0, behavior: "smooth" });
   firstNameOfNewPatient?.focus();
 });
 
-// Logout
 btnLogout?.addEventListener("click", forceLogout);
 
-// Init
+
+// --------------------------------------------------
+// Initial page load
+// --------------------------------------------------
+
 clearSelectedPatientUI();
 loadingTheWelcome();
 loadAllPatients();

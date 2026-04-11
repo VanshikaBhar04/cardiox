@@ -1,4 +1,17 @@
+// --------------------------------------------------
+// CardioX Homepage Session Script
+// --------------------------------------------------
+
+// Updates homepage navigation and call-to-action content
+// based on whether a user is currently authenticated.
+
+
+// --------------------------------------------------
+// Initial page load
+// --------------------------------------------------
+
 document.addEventListener("DOMContentLoaded", () => {
+  // Retrieves the current stored session to personalise the homepage
   const session = getSession();
 
   const navLinks = document.getElementById("navLinks");
@@ -12,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!navLinks || !heroPrimaryCta || !heroSecondaryCta) return;
 
   if (isLoggedIn()) {
+    // Personalises navigation for authenticated users based on role
     const dashboardUrl = getDashboardUrlByRole(session.role);
     const roleLabel = getRoleLabel(session.role);
 
@@ -44,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("navLogoutBtn")?.addEventListener("click", logoutUser);
   } else {
+    // Displays public navigation and entry points for unauthenticated visitors
     navLinks.innerHTML = `
       <a href="index.html" class="active">Home</a>
       <a href="about.html">About Us</a>

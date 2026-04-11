@@ -1,4 +1,7 @@
-# Core FastAPI and Imports
+# --------------------------------------------------
+# Core imports
+# --------------------------------------------------
+
 import re
 from io import BytesIO
 from typing import Optional
@@ -8,26 +11,40 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, EmailStr
 
+# --------------------------------------------------
+# Reporting
+# --------------------------------------------------
+
 from app.reporting.pdf_report import build_assessment_pdf
 
-# Machine Learning Inference - for risk prediction
+# --------------------------------------------------
+# Machine learning inference
+# --------------------------------------------------
+
+# Provides cardiovascular risk prediction, explainability, and follow-up advice
 from app.ml.inference import predict_risk, explain_risk, generate_advice
 
-# Authentication and Authorization
+# --------------------------------------------------
+# Authentication and authorisation
+# --------------------------------------------------
+
 from app.auth import (
     verify_password,
     create_access_token,
-    hash_password,
+    hashing_password,
     get_current_user,
     require_role,
 )
 
-# Database access functions
+# --------------------------------------------------
+# Database access layer
+# --------------------------------------------------
+
 from app.db import (
     init_db,
     get_user_by_username,
     get_user_by_id,
-    create_user,
+    create_a_user,
     get_user_by_email,
     create_pending_clinician_user,
     update_user_admin,
@@ -49,10 +66,9 @@ from app.db import (
     delete_user_admin,
     approve_user_request,
     deny_user_request,
-    create_full_user,
-    count_admin_users,
+    createfulluser,
 
-     # Clinician - patient management
+    # Clinician - patient management
     create_patient,
     get_patient_by_uid,
     get_patient_by_uid_for_clinician,
@@ -61,21 +77,25 @@ from app.db import (
     delete_patient_by_uid,
     count_assessments_for_patient,
 
-
     # Assessments
     get_assessment_by_id,
-    update_assessment,
+    update_the_assessment,
     create_assessment,
     list_assessments,
     delete_assessment,
 
-    # Audit Log
+    # Audit log
     create_audit_log,
     list_audit_logs,
-
 )
 
+
+# --------------------------------------------------
+# Helper functions
+# --------------------------------------------------
+
 def generate_username(first_name: str, last_name: str) -> str:
+    # Generates a unique username for clinician signup requests
     base = f"{first_name.lower()}.{last_name.lower()}"
     username = base
     counter = 1
@@ -86,34 +106,37 @@ def generate_username(first_name: str, last_name: str) -> str:
 
     return username
 
+
 # --------------------------------------------------
-# FastAPI app configuration
+# FastAPI application configuration
 # --------------------------------------------------
 
 app = FastAPI(
     title="CardioX API",
     description="Heart attack risk prediction backend",
-    version="0.1.0"
+    version="0.1.0",
 )
 
+
 # --------------------------------------------------
-# Startup
+# Startup configuration
 # --------------------------------------------------
 
 @app.on_event("startup")
 def on_startup():
+    # Initialises the database and ensures a default admin account exists
     init_db()
 
-    # Create default admin user if missing
     admin = get_user_by_username("admin")
     if admin is None:
-        create_user("admin", hash_password("admin123"), "admin")
+        create_a_user("admin", hashing_password("admin123"), "admin")
 
 
 # --------------------------------------------------
-# CORS
+# CORS configuration
 # --------------------------------------------------
 
+# Allows the frontend application to communicate with the FastAPI backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -127,8 +150,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # --------------------------------------------------
-# Request Schemas
+# Request schemas
 # --------------------------------------------------
 
 class LoginInput(BaseModel):
@@ -139,7 +163,6 @@ class LoginInput(BaseModel):
 class SignupRequest(BaseModel):
     first_name: str
     last_name: str
-
     email: EmailStr
     department: str
     password: str
@@ -156,6 +179,7 @@ class ClinicianUpdateInput(BaseModel):
     first_name: str
     last_name: str
 
+
 class AdminUserCreateInput(BaseModel):
     username: str
     password: str
@@ -164,6 +188,7 @@ class AdminUserCreateInput(BaseModel):
     email: EmailStr
     department: str
     role: str
+
 
 class PatientCreateInput(BaseModel):
     first_name: str
@@ -194,8 +219,10 @@ class AdminUserUpdateInput(BaseModel):
     role: str
     department: str
 
+
 class AdminPasswordResetInput(BaseModel):
     new_password: str
+
 
 class ApprovalInput(BaseModel):
     role: str
@@ -206,10 +233,11 @@ class DenialInput(BaseModel):
 
 
 # --------------------------------------------------
-# Validation Helpers
+# Validation helpers
 # --------------------------------------------------
 
 def letters_only_name(value: str, field_name: str) -> str:
+    # Validates personal names used across user and patient records
     value = (value or "").strip()
 
     if not value:
@@ -218,13 +246,14 @@ def letters_only_name(value: str, field_name: str) -> str:
     if not re.fullmatch(r"[A-Za-z]+", value):
         raise HTTPException(
             status_code=400,
-            detail=f"{field_name} must contain letters only. Please retry."
+            detail=f"{field_name} must contain letters only. Please retry.",
         )
 
     return value.capitalize()
 
 
 def validate_and_format_dob(dob: str) -> str:
+    # Ensures patient date of birth is present and in HTML date input format
     dob = (dob or "").strip()
 
     if not dob:
@@ -238,46 +267,81 @@ def validate_and_format_dob(dob: str) -> str:
 
 
 def validate_sex(value: str) -> str:
+    # Restricts sex values to the expected clinical options used by the model
     value = (value or "").strip()
+
     if value not in {"Male", "Female"}:
-        raise HTTPException(status_code=400, detail="Sex must be either Male or Female.")
+        raise HTTPException(
+            status_code=400,
+            detail="Sex must be either Male or Female.",
+        )
+
     return value
 
 
 def validate_username(value: str) -> str:
+    # Validates usernames before authentication or account creation
     value = (value or "").strip()
+
     if not value:
         raise HTTPException(status_code=400, detail="Username is required.")
+
     if len(value) < 3:
-        raise HTTPException(status_code=400, detail="Username must be at least 3 characters long.")
+        raise HTTPException(
+            status_code=400,
+            detail="Username must be at least 3 characters long.",
+        )
+
     return value
 
 
 def validate_password(value: str) -> str:
+    # Enforces password strength for account security within the system
     value = (value or "").strip()
+
     if not value:
         raise HTTPException(status_code=400, detail="Password is required.")
+
     if len(value) < 6:
-        raise HTTPException(status_code=400, detail="Password must be at least 6 characters long.")
+        raise HTTPException(
+            status_code=400,
+            detail="Password must be at least 6 characters long.",
+        )
+
     if not re.search(r"[A-Z]", value):
-        raise HTTPException(status_code=400, detail="Password must contain at least 1 uppercase letter.")
+        raise HTTPException(
+            status_code=400,
+            detail="Password must contain at least 1 uppercase letter.",
+        )
+
     if not re.search(r"[a-z]", value):
-        raise HTTPException(status_code=400, detail="Password must contain at least 1 lowercase letter.")
+        raise HTTPException(
+            status_code=400,
+            detail="Password must contain at least 1 lowercase letter.",
+        )
+
     if not re.search(r"[^A-Za-z0-9]", value):
-        raise HTTPException(status_code=400, detail="Password must contain at least 1 symbol.")
+        raise HTTPException(
+            status_code=400,
+            detail="Password must contain at least 1 symbol.",
+        )
+
     return value
 
 
 def validate_role(value: str) -> str:
+    # Restricts role assignment to approved application roles
     value = (value or "").strip()
     allowed = {"admin", "manager", "employee", "it_technician", "clinician"}
+
     if value not in allowed:
         raise HTTPException(status_code=400, detail="Invalid role selected.")
+
     return value
 
 
 # --------------------------------------------------
-# Basic Health / Test Endpoints
+# Basic health and test endpoints
 # --------------------------------------------------
 
 @app.get("/")
@@ -291,11 +355,12 @@ def health():
 
 
 # --------------------------------------------------
-# Authentication Endpoints
+# Authentication endpoints
 # --------------------------------------------------
 
 @app.post("/auth/login")
 def login(payload: LoginInput):
+    # Authenticates a user and returns a JWT for protected routes
     username = validate_username(payload.username)
     user = get_user_by_username(username)
 
@@ -308,32 +373,35 @@ def login(payload: LoginInput):
         if user.get("approval_status") == "pending":
             raise HTTPException(
                 status_code=403,
-                detail="Your account is awaiting admin approval."
+                detail="Your account is awaiting admin approval.",
             )
 
         if user.get("approval_status") == "rejected":
             reason = user.get("denial_reason") or "No reason provided."
             raise HTTPException(
                 status_code=403,
-                detail=f"Your account request was declined. Reason: {reason}"
+                detail=f"Your account request was declined. Reason: {reason}",
             )
 
-    token = create_access_token({
-        "sub": str(user["id"]),
-        "username": user["username"],
-        "role": user["role"]
-    })
+    token = create_access_token(
+        {
+            "sub": str(user["id"]),
+            "username": user["username"],
+            "role": user["role"],
+        }
+    )
 
     return {
         "access_token": token,
         "token_type": "bearer",
         "role": user["role"],
-        "username": user["username"]
+        "username": user["username"],
     }
 
 
 @app.post("/auth/signup")
 def signup(payload: SignupRequest):
+    # Creates a pending clinician account request for admin approval
     password = validate_password(payload.password)
     first_name = letters_only_name(payload.first_name, "First name")
     last_name = letters_only_name(payload.last_name, "Last name")
@@ -348,7 +416,7 @@ def signup(payload: SignupRequest):
 
     created = create_pending_clinician_user(
         username=username,
-        password_hash=hash_password(password),
+        password_hash=hashing_password(password),
         first_name=first_name,
         last_name=last_name,
         email=email,
@@ -357,17 +425,20 @@ def signup(payload: SignupRequest):
 
     return {
         "message": "Signup request submitted successfully.",
-        "generated_username": username,   
+        "generated_username": username,
         "approval_status": created["approval_status"],
     }
 
+
 @app.get("/me")
 def me(user=Depends(get_current_user)):
+    # Returns the authenticated user payload from the JWT
     return user
 
 
 @app.get("/profile/me")
 def profile_me(user=Depends(get_current_user)):
+    # Retrieves the full user profile from the database
     profile = get_user_by_id(user["id"])
     if profile is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -375,11 +446,15 @@ def profile_me(user=Depends(get_current_user)):
 
 
 # --------------------------------------------------
-# Admin - Clinician Management
+# Admin endpoints - clinician management
 # --------------------------------------------------
 
 @app.post("/admin/clinicians")
-def admin_create_clinician(payload: ClinicianCreateInput, admin=Depends(require_role("admin"))):
+def admin_create_clinician(
+    payload: ClinicianCreateInput,
+    admin=Depends(require_role("admin")),
+):
+    # Allows an admin to create a clinician account directly
     username = validate_username(payload.username)
     password = validate_password(payload.password)
     first_name = letters_only_name(payload.first_name, "First name")
@@ -390,7 +465,7 @@ def admin_create_clinician(payload: ClinicianCreateInput, admin=Depends(require_
 
     created = create_clinician_user(
         username=username,
-        password_hash=hash_password(password),
+        password_hash=hashing_password(password),
         first_name=first_name,
         last_name=last_name,
     )
@@ -401,12 +476,13 @@ def admin_create_clinician(payload: ClinicianCreateInput, admin=Depends(require_
         "clinician_uid": created["clinician_uid"],
         "first_name": first_name,
         "last_name": last_name,
-        "role": "clinician"
+        "role": "clinician",
     }
 
 
 @app.get("/admin/clinicians")
 def admin_list_clinicians(admin=Depends(require_role("admin"))):
+    # Returns all clinician accounts for admin oversight
     return list_clinicians()
 
 
@@ -414,8 +490,9 @@ def admin_list_clinicians(admin=Depends(require_role("admin"))):
 def admin_update_clinician(
     clinician_id: int,
     payload: ClinicianUpdateInput,
-    admin=Depends(require_role("admin"))
+    admin=Depends(require_role("admin")),
 ):
+    # Updates clinician identity details
     first_name = letters_only_name(payload.first_name, "First name")
     last_name = letters_only_name(payload.last_name, "Last name")
 
@@ -427,7 +504,11 @@ def admin_update_clinician(
 
 
 @app.delete("/admin/clinicians/{clinician_id}")
-def admin_delete_clinician(clinician_id: int, admin=Depends(require_role("admin"))):
+def admin_delete_clinician(
+    clinician_id: int,
+    admin=Depends(require_role("admin")),
+):
+    # Removes a clinician account from the system
     ok = delete_clinician(clinician_id)
     if not ok:
         raise HTTPException(status_code=404, detail="Clinician not found")
@@ -435,11 +516,12 @@ def admin_delete_clinician(clinician_id: int, admin=Depends(require_role("admin"
 
 
 # --------------------------------------------------
-# Admin - Full User Management
+# Admin endpoints - full user management
 # --------------------------------------------------
 
 @app.get("/admin/users")
 def admin_list_users(admin=Depends(require_role("admin"))):
+    # Returns all system users for administrative review
     return list_all_users()
 
 
@@ -447,8 +529,9 @@ def admin_list_users(admin=Depends(require_role("admin"))):
 def admin_update_user(
     user_id: int,
     payload: AdminUserUpdateInput,
-    admin=Depends(require_role("admin"))
+    admin=Depends(require_role("admin")),
 ):
+    # Updates user role and profile information, then records an audit entry
     first_name = letters_only_name(payload.first_name, "First name")
     last_name = letters_only_name(payload.last_name, "Last name")
     role = validate_role(payload.role)
@@ -469,24 +552,26 @@ def admin_update_user(
         action="update_user",
         target_user_id=user_id,
         target_username=target["username"] if target else None,
-        details=f"Updated role={role}, department={department}"
+        details=f"Updated role={role}, department={department}",
     )
 
     return {"updated": True, "id": user_id}
+
 
 @app.put("/admin/users/{user_id}/reset-password")
 def admin_reset_user_password(
     user_id: int,
     payload: AdminPasswordResetInput,
-    admin=Depends(require_role("admin"))
+    admin=Depends(require_role("admin")),
 ):
+    # Allows an admin to reset a user's password securely
     new_password = validate_password(payload.new_password)
 
     target = get_user_by_id(user_id)
     if target is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    ok = reset_user_password_admin(user_id, hash_password(new_password))
+    ok = reset_user_password_admin(user_id, hashing_password(new_password))
     if not ok:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -495,16 +580,18 @@ def admin_reset_user_password(
         action="reset_password",
         target_user_id=user_id,
         target_username=target["username"],
-        details="Password reset by admin"
+        details="Password reset by admin",
     )
 
     return {"reset": True, "id": user_id}
-    
+
+
 @app.post("/admin/users")
-def admin_create_user(
+def admin_create_a_user(
     payload: AdminUserCreateInput,
-    admin=Depends(require_role("admin"))
+    admin=Depends(require_role("admin")),
 ):
+    # Creates a complete user account and records the action in the audit log
     username = validate_username(payload.username)
     password = validate_password(payload.password)
     first_name = letters_only_name(payload.first_name, "First name")
@@ -519,9 +606,9 @@ def admin_create_user(
     if get_user_by_email(email) is not None:
         raise HTTPException(status_code=400, detail="Email already exists")
 
-    created = create_full_user(
+    created = createfulluser(
         username=username,
-        password_hash=hash_password(password),
+        password_hash=hashing_password(password),
         role=role,
         first_name=first_name,
         last_name=last_name,
@@ -531,10 +618,10 @@ def admin_create_user(
 
     create_audit_log(
         actor_user_id=admin["id"],
-        action="create_user",
+        action="create_a_user",
         target_user_id=created["id"],
         target_username=created["username"],
-        details=f"Created user with role={role}"
+        details=f"Created user with role={role}",
     )
 
     return created
@@ -544,7 +631,7 @@ def admin_create_user(
         action="update_user",
         target_user_id=user_id,
         target_username=target["username"] if target else None,
-        details=f"Updated role={role}, department={department}"
+        details=f"Updated role={role}, department={department}",
     )
 
     return {"updated": True, "id": user_id}
@@ -552,8 +639,10 @@ def admin_create_user(
 
 @app.delete("/admin/users/{user_id}")
 def admin_delete_user(user_id: int, admin=Depends(require_role("admin"))):
+    # Deletes a user account and stores the action in the audit trail
     target = get_user_by_id(user_id)
     ok = delete_user_admin(user_id)
+
     if not ok:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -562,7 +651,7 @@ def admin_delete_user(user_id: int, admin=Depends(require_role("admin"))):
         action="delete_user",
         target_user_id=user_id,
         target_username=target["username"] if target else None,
-        details="User deleted from system"
+        details="User deleted from system",
     )
 
     return {"deleted": True, "id": user_id}
@@ -570,6 +659,7 @@ def admin_delete_user(user_id: int, admin=Depends(require_role("admin"))):
 
 @app.get("/admin/pending-users")
 def admin_list_pending_users(admin=Depends(require_role("admin"))):
+    # Returns all pending signup requests awaiting review
     return list_pending_users()
 
 
@@ -577,12 +667,14 @@ def admin_list_pending_users(admin=Depends(require_role("admin"))):
 def admin_approve_user(
     user_id: int,
     payload: ApprovalInput,
-    admin=Depends(require_role("admin"))
+    admin=Depends(require_role("admin")),
 ):
+    # Approves a pending signup request and assigns a role
     role = validate_role(payload.role)
 
     target = get_user_by_id(user_id)
     ok = approve_user_request(user_id, role)
+
     if not ok:
         raise HTTPException(status_code=404, detail="Pending user not found")
 
@@ -591,23 +683,29 @@ def admin_approve_user(
         action="approve_user",
         target_user_id=user_id,
         target_username=target["username"] if target else None,
-        details=f"Approved with role: {role}"
+        details=f"Approved with role: {role}",
     )
 
     return {"approved": True, "id": user_id, "role": role}
+
 
 @app.post("/admin/pending-users/{user_id}/deny")
 def admin_deny_user(
     user_id: int,
     payload: DenialInput,
-    admin=Depends(require_role("admin"))
+    admin=Depends(require_role("admin")),
 ):
+    # Rejects a pending account request and records the denial reason
     reason = payload.reason.strip()
     if not reason:
-        raise HTTPException(status_code=400, detail="Denial reason is required.")
+        raise HTTPException(
+            status_code=400,
+            detail="Denial reason is required.",
+        )
 
     target = get_user_by_id(user_id)
     ok = deny_user_request(user_id, reason)
+
     if not ok:
         raise HTTPException(status_code=404, detail="Pending user not found")
 
@@ -616,21 +714,31 @@ def admin_deny_user(
         action="deny_user",
         target_user_id=user_id,
         target_username=target["username"] if target else None,
-        details=f"Reason: {reason}"
+        details=f"Reason: {reason}",
     )
 
     return {"denied": True, "id": user_id}
 
+
 @app.get("/admin/audit-logs")
-def admin_list_audit_logs(limit: int = 100, admin=Depends(require_role("admin"))):
+def admin_list_audit_logs(
+    limit: int = 100,
+    admin=Depends(require_role("admin")),
+):
+    # Exposes audit history for governance and accountability
     return list_audit_logs(limit=limit)
 
+
 # --------------------------------------------------
-# Clinician - Patient Management
+# Clinician endpoints - patient management
 # --------------------------------------------------
 
 @app.post("/clinician/patients")
-def clinician_create_patient(payload: PatientCreateInput, user=Depends(require_role("clinician"))):
+def clinician_create_patient(
+    payload: PatientCreateInput,
+    user=Depends(require_role("clinician")),
+):
+    # Creates a patient record linked to the authenticated clinician
     first_name = letters_only_name(payload.first_name, "First name")
     last_name = letters_only_name(payload.last_name, "Last name")
     dob = validate_and_format_dob(payload.dob)
@@ -644,13 +752,18 @@ def clinician_search_patients(
     patient_uid: str = "",
     name: str = "",
     limit: int = 25,
-    user=Depends(require_role("clinician"))
+    user=Depends(require_role("clinician")),
 ):
+    # Supports clinician search across stored patient records
     return search_patients(patient_uid=patient_uid, name=name, limit=limit)
 
 
 @app.get("/clinician/patients/{patient_uid}")
-def clinician_get_patient(patient_uid: str, user=Depends(require_role("clinician"))):
+def clinician_get_patient(
+    patient_uid: str,
+    user=Depends(require_role("clinician")),
+):
+    # Retrieves a single patient profile for review
     patient = get_patient_by_uid(patient_uid)
     if patient is None:
         raise HTTPException(status_code=404, detail="Patient not found")
@@ -661,8 +774,9 @@ def clinician_get_patient(patient_uid: str, user=Depends(require_role("clinician
 def clinician_update_patient(
     patient_uid: str,
     payload: PatientCreateInput,
-    user=Depends(require_role("clinician"))
+    user=Depends(require_role("clinician")),
 ):
+    # Updates core patient demographic information
     first_name = letters_only_name(payload.first_name, "First name")
     last_name = letters_only_name(payload.last_name, "Last name")
     dob = validate_and_format_dob(payload.dob)
@@ -673,8 +787,13 @@ def clinician_update_patient(
         raise HTTPException(status_code=404, detail="Patient not found")
     return updated
 
+
 @app.delete("/clinician/patients/{patient_uid}")
-def clinician_delete_patient(patient_uid: str, user=Depends(require_role("clinician"))):
+def clinician_delete_patient(
+    patient_uid: str,
+    user=Depends(require_role("clinician")),
+):
+    # Deletes a patient and any linked assessments owned by the clinician
     patient = get_patient_by_uid_for_clinician(patient_uid, user["id"])
     if patient is None:
         raise HTTPException(status_code=404, detail="Patient not found")
@@ -689,20 +808,21 @@ def clinician_delete_patient(patient_uid: str, user=Depends(require_role("clinic
         "deleted": True,
         "patient_uid": patient_uid,
         "deleted_assessments": assessment_count,
-        "message": "Patient and linked assessments deleted successfully."
+        "message": "Patient and linked assessments deleted successfully.",
     }
 
 
 # --------------------------------------------------
-# Clinician - Assessments
+# Clinician endpoints - assessments
 # --------------------------------------------------
 
 @app.post("/clinician/patients/{patient_uid}/assessments")
 def clinician_create_assessment(
     patient_uid: str,
     payload: PatientInput,
-    user=Depends(require_role("clinician"))
+    user=Depends(require_role("clinician")),
 ):
+    # Runs the ML model, generates SHAP explanations, and stores the assessment
     if get_patient_by_uid(patient_uid) is None:
         raise HTTPException(status_code=404, detail="Patient not found")
 
@@ -723,7 +843,7 @@ def clinician_create_assessment(
         "assessment": saved,
         "prediction": result,
         "explainability": xai,
-        "advice": advice
+        "advice": advice,
     }
 
 
@@ -731,13 +851,22 @@ def clinician_create_assessment(
 def clinician_list_assessments(
     patient_uid: str,
     limit: int = 50,
-    user=Depends(require_role("clinician"))
+    user=Depends(require_role("clinician")),
 ):
-    return list_assessments(patient_uid=patient_uid, clinician_id=user["id"], limit=limit)
+    # Lists historical assessments for a patient under the clinician's care
+    return list_assessments(
+        patient_uid=patient_uid,
+        clinician_id=user["id"],
+        limit=limit,
+    )
 
 
 @app.delete("/clinician/assessments/{assessment_id}")
-def clinician_delete_assessment(assessment_id: int, user=Depends(require_role("clinician"))):
+def clinician_delete_assessment(
+    assessment_id: int,
+    user=Depends(require_role("clinician")),
+):
+    # Removes an assessment record created by the clinician
     ok = delete_assessment(assessment_id, clinician_id=user["id"])
     if not ok:
         raise HTTPException(status_code=404, detail="Assessment not found")
@@ -745,7 +874,11 @@ def clinician_delete_assessment(assessment_id: int, user=Depends(require_role("c
 
 
 @app.get("/clinician/assessments/{assessment_id}")
-def clinician_get_assessment(assessment_id: int, user=Depends(require_role("clinician"))):
+def clinician_get_assessment(
+    assessment_id: int,
+    user=Depends(require_role("clinician")),
+):
+    # Retrieves a saved assessment for review or reporting
     assessment = get_assessment_by_id(assessment_id, clinician_id=user["id"])
     if assessment is None:
         raise HTTPException(status_code=404, detail="Assessment not found")
@@ -753,17 +886,18 @@ def clinician_get_assessment(assessment_id: int, user=Depends(require_role("clin
 
 
 @app.put("/clinician/assessments/{assessment_id}")
-def clinician_update_assessment(
+def clinician_update_the_assessment(
     assessment_id: int,
     payload: PatientInput,
-    user=Depends(require_role("clinician"))
+    user=Depends(require_role("clinician")),
 ):
+    # Recalculates risk and explainability when an assessment is updated
     inputs = payload.model_dump()
     result = predict_risk(inputs)
     xai = explain_risk(inputs, top_k=6)
     advice = generate_advice(inputs, xai["top_factors"])
 
-    ok = update_assessment(
+    ok = update_the_assessment(
         assessment_id=assessment_id,
         clinician_id=user["id"],
         inputs=inputs,
@@ -778,7 +912,7 @@ def clinician_update_assessment(
         "updated": True,
         "prediction": result,
         "explainability": xai,
-        "advice": advice
+        "advice": advice,
     }
 
 
@@ -786,8 +920,9 @@ def clinician_update_assessment(
 def clinician_export_assessment_pdf(
     assessment_id: int,
     audience: str = Query("clinician"),
-    user=Depends(require_role("clinician"))
+    user=Depends(require_role("clinician")),
 ):
+    # Generates a PDF summary tailored for either a clinician or a patient audience
     assessment = get_assessment_by_id(assessment_id, clinician_id=user["id"])
     if assessment is None:
         raise HTTPException(status_code=404, detail="Assessment not found")
@@ -823,7 +958,10 @@ def clinician_export_assessment_pdf(
 
     audience = (audience or "clinician").strip().lower()
     if audience not in {"patient", "clinician"}:
-        raise HTTPException(status_code=400, detail="Invalid audience. Use 'patient' or 'clinician'.")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid audience. Use 'patient' or 'clinician'.",
+        )
 
     pdf_bytes = build_assessment_pdf(
         audience=audience,
@@ -835,7 +973,10 @@ def clinician_export_assessment_pdf(
     )
 
     suffix = "Patient" if audience == "patient" else "Clinician"
-    filename = f"CardioX_{suffix}_Report_{assessment.get('patient_uid', 'patient')}_{assessment_id}.pdf"
+    filename = (
+        f"CardioX_{suffix}_Report_"
+        f"{assessment.get('patient_uid', 'patient')}_{assessment_id}.pdf"
+    )
 
     return StreamingResponse(
         BytesIO(pdf_bytes),

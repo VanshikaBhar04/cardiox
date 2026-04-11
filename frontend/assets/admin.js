@@ -1,14 +1,41 @@
+// --------------------------------------------------
+// CardioX Admin Dashboard Script
+// --------------------------------------------------
+
+// Handles administrative workflows including user management,
+// pending account approvals, denials, and audit log review.
+
+
+// --------------------------------------------------
+// API configuration and authentication
+// --------------------------------------------------
+
 const API_BASE = "http://127.0.0.1:8000";
 const token = localStorage.getItem("cardiox_token");
+
+
+// --------------------------------------------------
+// Main table and status elements
+// --------------------------------------------------
 
 const userTableBody = document.getElementById("userTableBody");
 const pendingTableBody = document.getElementById("pendingTableBody");
 const auditTableBody = document.getElementById("auditTableBody");
-const adminStatus = document.getElementById("adminStatus");
+const adminCurrentStatus = document.getElementById("adminCurrentStatus");
+
+
+// --------------------------------------------------
+// Refresh buttons
+// --------------------------------------------------
 
 const btnRefreshUsers = document.getElementById("btnRefreshUsers");
 const btnRefreshPending = document.getElementById("btnRefreshPending");
 const btnRefreshAudit = document.getElementById("btnRefreshAudit");
+
+
+// --------------------------------------------------
+// Edit user form elements
+// --------------------------------------------------
 
 const editUserSection = document.getElementById("editUserSection");
 const editUserForm = document.getElementById("editUserForm");
@@ -19,7 +46,12 @@ const editUserRole = document.getElementById("editUserRole");
 const editUserDepartment = document.getElementById("editUserDepartment");
 const btnCancelUserEdit = document.getElementById("btnCancelUserEdit");
 
-const createUserForm = document.getElementById("createUserForm");
+
+// --------------------------------------------------
+// Create user form elements
+// --------------------------------------------------
+
+const createAUserForm = document.getElementById("createAUserForm");
 const createUserStatus = document.getElementById("createUserStatus");
 const createUsername = document.getElementById("createUsername");
 const createPassword = document.getElementById("createPassword");
@@ -29,9 +61,21 @@ const createEmail = document.getElementById("createEmail");
 const createDepartment = document.getElementById("createDepartment");
 const createRole = document.getElementById("createRole");
 
+
+// --------------------------------------------------
+// Client-side page state
+// --------------------------------------------------
+
+// Stores the latest loaded user list for edit lookups
 let cachedUsers = [];
 
+
+// --------------------------------------------------
+// Authentication helpers
+// --------------------------------------------------
+
 function authHeaders() {
+  // Builds authenticated request headers for protected admin endpoints
   return {
     "Content-Type": "application/json",
     "Authorization": `Bearer ${token}`
@@ -39,19 +83,36 @@ function authHeaders() {
 }
 
 function forceLogout() {
+  // Clears local session data and redirects to login when authentication fails
   localStorage.removeItem("cardiox_token");
   localStorage.removeItem("cardiox_role");
   localStorage.removeItem("cardiox_username");
   window.location.replace("login.html");
 }
 
+
+// --------------------------------------------------
+// Status and formatting helpers
+// --------------------------------------------------
+
 function setStatus(msg, isError = false) {
-  if (!adminStatus) return;
-  adminStatus.textContent = msg;
-  adminStatus.style.color = isError ? "#dc2626" : "#475569";
+  // Updates the main admin status message area
+  if (!adminCurrentStatus) return;
+
+  adminCurrentStatus.textContent = msg;
+  adminCurrentStatus.style.color = isError ? "#dc2626" : "#475569";
+}
+
+function setCreateUserStatus(msg, isError = false) {
+  // Updates feedback for the create-user form
+  if (!createUserStatus) return;
+
+  createUserStatus.textContent = msg;
+  createUserStatus.style.color = isError ? "#dc2626" : "#475569";
 }
 
 function formatRole(role) {
+  // Converts stored role keys into user-friendly labels
   const map = {
     admin: "Admin",
     manager: "Manager",
@@ -59,15 +120,18 @@ function formatRole(role) {
     it_technician: "IT Technician",
     clinician: "Clinician"
   };
+
   return map[role] || role || "—";
 }
 
 function formatStatus(status) {
+  // Capitalises approval status for display
   if (!status) return "—";
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
 function formatAuditAction(action) {
+  // Converts stored audit action keys into readable labels
   const map = {
     approve_user: "Approved User",
     deny_user: "Denied User",
@@ -76,19 +140,24 @@ function formatAuditAction(action) {
     create_clinician: "Created Clinician",
     reset_password: "Reset Password"
   };
+
   return map[action] || action || "—";
 }
 
 function formatDateTime(iso) {
+  // Formats database timestamps into a readable UK-style display
   if (!iso) return "—";
+
   const dt = iso.replace("T", " ").slice(0, 19);
   const [datePart, timePart] = dt.split(" ");
   if (!datePart) return iso;
+
   const [year, month, day] = datePart.split("-");
   return `${day}/${month}/${year}${timePart ? ` ${timePart}` : ""}`;
 }
 
 function renderStatusPill(status) {
+  // Returns a styled approval-status badge for the UI
   const value = (status || "").toLowerCase();
 
   let cls = "status-pill-default";
@@ -99,7 +168,13 @@ function renderStatusPill(status) {
   return `<span class="status-pill ${cls}">${formatStatus(status)}</span>`;
 }
 
+
+// --------------------------------------------------
+// Edit user section helpers
+// --------------------------------------------------
+
 function showEditUser(user) {
+  // Displays the edit form and pre-fills it with the selected user's details
   if (!editUserSection) return;
 
   editUserSection.style.display = "block";
@@ -113,6 +188,7 @@ function showEditUser(user) {
 }
 
 function hideEditUser() {
+  // Resets and hides the edit form after save or cancellation
   if (!editUserSection) return;
 
   editUserSection.style.display = "none";
@@ -124,7 +200,13 @@ function hideEditUser() {
   setStatus("");
 }
 
+
+// --------------------------------------------------
+// Table rendering
+// --------------------------------------------------
+
 function renderUsers(items) {
+  // Renders the main user management table
   if (!userTableBody) return;
 
   cachedUsers = items || [];
@@ -138,7 +220,7 @@ function renderUsers(items) {
     return;
   }
 
-  userTableBody.innerHTML = items.map(user => `
+  userTableBody.innerHTML = items.map((user) => `
     <tr>
       <td>
         <span class="admin-cell-strong">${user.username || "—"}</span>
@@ -161,6 +243,7 @@ function renderUsers(items) {
 }
 
 function renderPendingUsers(items) {
+  // Renders clinician and staff signup requests awaiting admin review
   if (!pendingTableBody) return;
 
   if (!items || items.length === 0) {
@@ -172,7 +255,7 @@ function renderPendingUsers(items) {
     return;
   }
 
-  pendingTableBody.innerHTML = items.map(user => `
+  pendingTableBody.innerHTML = items.map((user) => `
     <tr>
       <td>
         <span class="admin-cell-strong">${user.username || "—"}</span>
@@ -202,6 +285,7 @@ function renderPendingUsers(items) {
 }
 
 function renderAuditLogs(items) {
+  // Renders the administrative audit trail for accountability
   if (!auditTableBody) return;
 
   if (!items || items.length === 0) {
@@ -213,7 +297,7 @@ function renderAuditLogs(items) {
     return;
   }
 
-  auditTableBody.innerHTML = items.map(log => `
+  auditTableBody.innerHTML = items.map((log) => `
     <tr>
       <td>${formatDateTime(log.created_at)}</td>
       <td>
@@ -226,13 +310,13 @@ function renderAuditLogs(items) {
   `).join("");
 }
 
-function setCreateUserStatus(msg, isError = false) {
-  if (!createUserStatus) return;
-  createUserStatus.textContent = msg;
-  createUserStatus.style.color = isError ? "#dc2626" : "#475569";
-}
+
+// --------------------------------------------------
+// Data loading
+// --------------------------------------------------
 
 async function loadUsers() {
+  // Loads all users for the main admin user table
   if (userTableBody) {
     userTableBody.innerHTML = `
       <tr>
@@ -249,6 +333,7 @@ async function loadUsers() {
     const data = await res.json().catch(() => ({}));
 
     if (res.status === 401 || res.status === 403) return forceLogout();
+
     if (!res.ok) {
       userTableBody.innerHTML = `
         <tr>
@@ -270,6 +355,7 @@ async function loadUsers() {
 }
 
 async function loadPendingUsers() {
+  // Loads pending account requests for approval or denial
   if (pendingTableBody) {
     pendingTableBody.innerHTML = `
       <tr>
@@ -286,6 +372,7 @@ async function loadPendingUsers() {
     const data = await res.json().catch(() => ({}));
 
     if (res.status === 401 || res.status === 403) return forceLogout();
+
     if (!res.ok) {
       pendingTableBody.innerHTML = `
         <tr>
@@ -306,7 +393,8 @@ async function loadPendingUsers() {
   }
 }
 
-async function loadAuditLogs() {
+async function loadAllAuditLogs() {
+  // Loads recent audit log activity for administrative monitoring
   if (auditTableBody) {
     auditTableBody.innerHTML = `
       <tr>
@@ -323,6 +411,7 @@ async function loadAuditLogs() {
     const data = await res.json().catch(() => ({}));
 
     if (res.status === 401 || res.status === 403) return forceLogout();
+
     if (!res.ok) {
       auditTableBody.innerHTML = `
         <tr>
@@ -343,14 +432,20 @@ async function loadAuditLogs() {
   }
 }
 
+
+// --------------------------------------------------
+// User table interactions
+// --------------------------------------------------
+
 userTableBody?.addEventListener("click", async (e) => {
   const editBtn = e.target.closest("[data-edit-user]");
   const deleteBtn = e.target.closest("[data-delete-user]");
 
   if (editBtn) {
     const id = editBtn.getAttribute("data-edit-user");
-    const user = cachedUsers.find(u => String(u.id) === String(id));
+    const user = cachedUsers.find((u) => String(u.id) === String(id));
     if (!user) return;
+
     showEditUser(user);
     return;
   }
@@ -374,7 +469,7 @@ userTableBody?.addEventListener("click", async (e) => {
       setStatus("User deleted.");
       await loadUsers();
       await loadPendingUsers();
-      await loadAuditLogs();
+      await loadAllAuditLogs();
       hideEditUser();
     } catch (err) {
       setStatus("Network error while deleting user.", true);
@@ -382,7 +477,12 @@ userTableBody?.addEventListener("click", async (e) => {
   }
 });
 
-createUserForm?.addEventListener("submit", async (e) => {
+
+// --------------------------------------------------
+// Create user workflow
+// --------------------------------------------------
+
+createAUserForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const payload = {
@@ -420,11 +520,16 @@ createUserForm?.addEventListener("submit", async (e) => {
     createRole.value = "admin";
 
     await loadUsers();
-    await loadAuditLogs();
+    await loadAllAuditLogs();
   } catch (err) {
     setCreateUserStatus("Network error while creating user.", true);
   }
 });
+
+
+// --------------------------------------------------
+// Pending user approval and denial actions
+// --------------------------------------------------
 
 pendingTableBody?.addEventListener("click", async (e) => {
   const approveBtn = e.target.closest("[data-approve-user]");
@@ -450,10 +555,11 @@ pendingTableBody?.addEventListener("click", async (e) => {
       setStatus("User approved.");
       await loadUsers();
       await loadPendingUsers();
-      await loadAuditLogs();
+      await loadAllAuditLogs();
     } catch (err) {
       setStatus("Network error while approving user.", true);
     }
+
     return;
   }
 
@@ -481,12 +587,17 @@ pendingTableBody?.addEventListener("click", async (e) => {
 
       setStatus("Request denied.");
       await loadPendingUsers();
-      await loadAuditLogs();
+      await loadAllAuditLogs();
     } catch (err) {
       setStatus("Network error while denying user.", true);
     }
   }
 });
+
+
+// --------------------------------------------------
+// Edit user workflow
+// --------------------------------------------------
 
 editUserForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -515,20 +626,30 @@ editUserForm?.addEventListener("submit", async (e) => {
 
     setStatus("User updated.");
     await loadUsers();
-    await loadAuditLogs();
+    await loadAllAuditLogs();
     hideEditUser();
   } catch (err) {
     setStatus("Network error while updating user.", true);
   }
 });
 
+
+// --------------------------------------------------
+// Button actions
+// --------------------------------------------------
+
 btnCancelUserEdit?.addEventListener("click", hideEditUser);
 btnRefreshUsers?.addEventListener("click", loadUsers);
 btnRefreshPending?.addEventListener("click", loadPendingUsers);
-btnRefreshAudit?.addEventListener("click", loadAuditLogs);
+btnRefreshAudit?.addEventListener("click", loadAllAuditLogs);
+
+
+// --------------------------------------------------
+// Initial page load
+// --------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
   loadUsers();
   loadPendingUsers();
-  loadAuditLogs();
+  loadAllAuditLogs();
 });

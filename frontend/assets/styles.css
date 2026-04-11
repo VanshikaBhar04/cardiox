@@ -1,3 +1,6 @@
+/* ==================================================
+   CARDIOX DESIGN TOKENS / ROOT VARIABLES
+================================================== */
 :root {
   --bg: #89aedb;
   --card: #ffffff;
@@ -18,6 +21,9 @@
   --radius-lg: 18px;
 }
 
+/* ==================================================
+   GLOBAL RESET / BASE
+================================================== */
 * {
   box-sizing: border-box;
 }
@@ -33,10 +39,9 @@ body {
   color: var(--text);
 }
 
-/* =========================
+/* ==================================================
    SHARED NAVBAR SYSTEM
-========================= */
-
+================================================== */
 .hidden {
   display: none !important;
 }
@@ -242,6 +247,9 @@ body {
   color: var(--accent) !important;
 }
 
+/* ==================================================
+   SHARED NAVBAR RESPONSIVE
+================================================== */
 @media (max-width: 1240px) {
   .app-nav-container,
   .nav-container {
@@ -338,10 +346,9 @@ body {
   }
 }
 
-/* =========================
-   SHARED LAYOUT
-========================= */
-
+/* ==================================================
+   SHARED LAYOUT / CARDS / FORMS / BUTTONS
+================================================== */
 .container {
   max-width: 1220px;
   margin: 0 auto;
@@ -616,10 +623,9 @@ button:disabled {
   cursor: pointer;
 }
 
-/* =========================
-   HERO / PUBLIC PAGE
-========================= */
-
+/* ==================================================
+   HERO / PUBLIC PAGE SHARED
+================================================== */
 .public-page {
   max-width: 1220px;
   margin: 0 auto;
@@ -1048,10 +1054,9 @@ button:disabled {
   line-height: 1.7;
 }
 
-/* =========================
+/* ==================================================
    ABOUT PAGE
-========================= */
-
+================================================== */
 .about-page .page-hero {
   margin-bottom: 6px;
 }
@@ -1198,10 +1203,9 @@ button:disabled {
   }
 }
 
-/* =========================
+/* ==================================================
    FEATURES PAGE
-========================= */
-
+================================================== */
 .features-page .page-hero {
   margin-bottom: 6px;
 }
@@ -1376,10 +1380,9 @@ button:disabled {
   }
 }
 
-/* =========================
+/* ==================================================
    CONTACT PAGE
-========================= */
-
+================================================== */
 .contact-page .page-hero {
   margin-bottom: 6px;
 }
@@ -1595,10 +1598,9 @@ button:disabled {
   }
 }
 
-/* =========================
+/* ==================================================
    SAFETY PAGE
-========================= */
-
+================================================== */
 .safety-page .page-hero {
   margin-bottom: 6px;
 }
@@ -1722,10 +1724,9 @@ button:disabled {
   }
 }
 
-/* =========================
-   HERO IMAGE (REUSABLE)
-========================= */
-
+/* ==================================================
+   HERO IMAGE REUSABLE OVERRIDES
+================================================== */
 .hero-image-card {
   position: relative;
   border-radius: 22px;
@@ -1752,10 +1753,9 @@ button:disabled {
   pointer-events: none;
 }
 
-/* =========================
-   DASHBOARD
-========================= */
-
+/* ==================================================
+   DASHBOARD SHARED
+================================================== */
 .clinician-dashboard-container {
   max-width: 1220px;
 }
@@ -1956,10 +1956,9 @@ button:disabled {
   background: rgba(22, 163, 74, 0.16) !important;
 }
 
-/* =========================
-   Buttons for Assessment History on Clinician.HTML
-========================= */
-
+/* ==================================================
+   CLINICIAN ASSESSMENT HISTORY BUTTONS
+================================================== */
 .assessment-history-actions button[data-edit] {
   background: rgba(37, 99, 235, 0.08) !important;
   color: var(--accent) !important;
@@ -1983,9 +1982,6 @@ button:disabled {
   color: #b91c1c !important;
   border-color: rgba(220, 38, 38, 0.28) !important;
 }
-
-
-
 
 .assessment-history-list {
   display: flex;
@@ -2058,10 +2054,9 @@ button:disabled {
   line-height: 1.65;
 }
 
-/* =========================
+/* ==================================================
    ASSESSMENT PAGE REFINED UI
-========================= */
-
+================================================== */
 .assessment-workspace-container {
   max-width: 1280px;
 }
@@ -2151,10 +2146,9 @@ button:disabled {
   font-size: 22px;
 }
 
-/* =========================
-   ASSESSMENT PAGE - RESTORED PROFESSIONAL UI
-========================= */
-
+/* ==================================================
+   ASSESSMENT PAGE RESTORED PROFESSIONAL UI
+================================================== */
 .assessment-classic-container {
   max-width: 1280px;
 }
@@ -2430,8 +2424,6 @@ button:disabled {
   border-color: #1d4ed8;
 }
 
-
-
 .trend-toolbar {
   margin-bottom: 14px;
 }
@@ -2496,29 +2488,29 @@ button:disabled {
   }
 
   .assessment-right-column {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-  align-self: start;
-}
-
-.assessment-sticky-wrap {
-  position: sticky;
-  top: 108px;
-  align-self: start;
-  z-index: 20;
-}
-
-#assessmentSelectedPatientPanel {
-  margin: 0;
-}
-
-@media (max-width: 1100px) {
-  .assessment-sticky-wrap {
-    position: static;
-    top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    align-self: start;
   }
-}
+
+  .assessment-sticky-wrap {
+    position: sticky;
+    top: 108px;
+    align-self: start;
+    z-index: 20;
+  }
+
+  #assessmentSelectedPatientPanel {
+    margin: 0;
+  }
+
+  @media (max-width: 1100px) {
+    .assessment-sticky-wrap {
+      position: static;
+      top: auto;
+    }
+  }
 
   #assessmentSelectedPatientPanel.is-pinned {
     position: static;
@@ -2533,7 +2525,6 @@ button:disabled {
     padding-top: 0 !important;
   }
 }
-
 
 @media (max-width: 900px) {
   .trend-summary-grid {
@@ -2562,10 +2553,9 @@ button:disabled {
   }
 }
 
-/* =========================
+/* ==================================================
    TABLES
-========================= */
-
+================================================== */
 .table-wrapper {
   margin-top: 18px;
   overflow-x: auto;
@@ -2615,10 +2605,9 @@ button:disabled {
   background: #f8fafc;
 }
 
-/* =========================
+/* ==================================================
    ADMIN
-========================= */
-
+================================================== */
 .admin-sections-stack {
   display: flex;
   flex-direction: column;
@@ -2830,10 +2819,9 @@ button:disabled {
   scroll-margin-top: 110px;
 }
 
-/* =========================
+/* ==================================================
    AUTH / LOGIN / SIGNUP
-========================= */
-
+================================================== */
 .auth-page {
   min-height: 100vh;
   background:
@@ -2991,10 +2979,9 @@ button:disabled {
   font-weight: 800;
 }
 
-/* =========================
+/* ==================================================
    HELP / COMPLIANCE PREMIUM UI
-========================= */
-
+================================================== */
 .support-page-container {
   max-width: 1220px;
 }
@@ -3415,10 +3402,9 @@ button:disabled {
   font-size: 13px;
 }
 
-/* =========================
+/* ==================================================
    HELPERS
-========================= */
-
+================================================== */
 .empty-state-card {
   padding: 18px;
   border: 1px dashed var(--border);
@@ -3444,10 +3430,9 @@ button:disabled {
   pointer-events: none;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
-
+/* ==================================================
+   GLOBAL RESPONSIVE
+================================================== */
 @media (max-width: 1050px) {
   .dashboard-main-grid,
   .auth-layout,

@@ -1,20 +1,34 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- --------------------------------------------------
+       Document metadata
+  --------------------------------------------------- -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Contact CardioX | Support and Information</title>
+
+  <!-- Shared stylesheet -->
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
-
+  <!-- --------------------------------------------------
+       Shared navigation
+  --------------------------------------------------- -->
   <div id="navbarContainer"></div>
+
+  <!-- Session helpers must load before navbar logic -->
+  <script src="assets/session.js"></script>
   <script src="assets/navbar.js"></script>
 
+  <!-- --------------------------------------------------
+       Main contact content
+  --------------------------------------------------- -->
   <main class="public-page contact-page">
+    <!-- Hero section -->
     <section class="page-hero contact-hero">
       <div class="hero-content">
-
         <div class="card page-hero-card contact-hero-card">
           <span class="hero-badge">Contact CardioX</span>
           <h1>Support, guidance, and platform information for CardioX users.</h1>
@@ -29,10 +43,12 @@
               <strong>Platform support</strong>
               <span>Guidance for clinicians, admins, and workflow-related questions</span>
             </div>
+
             <div class="contact-highlight-card">
               <strong>Technical help</strong>
               <span>Support for login, page, and assessment issues</span>
             </div>
+
             <div class="contact-highlight-card">
               <strong>Quick answers</strong>
               <span>Common questions and troubleshooting in one place</span>
@@ -47,10 +63,10 @@
             class="hero-main-image"
           />
         </div>
-
       </div>
     </section>
 
+    <!-- Support channels section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Get In Touch</span>
@@ -102,6 +118,7 @@
       </div>
     </section>
 
+    <!-- Common topics section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Quick Help</span>
@@ -138,6 +155,7 @@
       </div>
     </section>
 
+    <!-- FAQ section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Frequently Asked Questions</span>
@@ -195,6 +213,7 @@
       </div>
     </section>
 
+    <!-- Notice section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Clinical Use Notice</span>
@@ -211,12 +230,14 @@
     </section>
   </main>
 
+  <!-- --------------------------------------------------
+       Footer
+  --------------------------------------------------- -->
   <footer class="public-footer">
     <div class="footer-container">
       <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
       <p>Designed for hospitals, NHS settings, healthcare professionals, and cardiology-focused clinical workflows.</p>
     </div>
   </footer>
-
 </body>
 </html>

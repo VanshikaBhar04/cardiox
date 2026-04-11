@@ -1,24 +1,38 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- --------------------------------------------------
+       Document metadata
+  --------------------------------------------------- -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>About CardioX | Cardiovascular Decision Support</title>
+
+  <!-- Shared stylesheet -->
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
-
+  <!-- --------------------------------------------------
+       Shared navigation
+  --------------------------------------------------- -->
   <div id="navbarContainer"></div>
+
+  <!-- Load session helpers before navbar logic -->
+  <script src="assets/session.js"></script>
   <script src="assets/navbar.js"></script>
 
+  <!-- --------------------------------------------------
+       Main content
+  --------------------------------------------------- -->
   <main class="public-page about-page">
-
+    <!-- Hero section -->
     <section class="page-hero about-hero">
       <div class="hero-content">
-
         <div class="card page-hero-card about-hero-card">
           <span class="hero-badge">About CardioX</span>
           <h1>Built to support clearer, safer, and more usable cardiovascular risk assessment.</h1>
+
           <p>
             CardioX is a clinician-facing cardiovascular decision support platform designed for hospitals,
             NHS settings, healthcare professionals, and cardiology teams. It combines structured patient
@@ -31,10 +45,12 @@
               <strong>Clinical workflow</strong>
               <span>Designed for structured review and follow-up</span>
             </div>
+
             <div class="about-stat">
               <strong>Interpretable output</strong>
               <span>Risk percentage, bands, and supporting insight</span>
             </div>
+
             <div class="about-stat">
               <strong>Professional use</strong>
               <span>Aligned to healthcare-focused usability principles</span>
@@ -49,10 +65,10 @@
             class="hero-main-image"
           />
         </div>
-
       </div>
     </section>
 
+    <!-- Positioning section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Our Positioning</span>
@@ -80,6 +96,7 @@
       </div>
     </section>
 
+    <!-- Motivation section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Why It Matters</span>
@@ -109,6 +126,7 @@
       </div>
     </section>
 
+    <!-- Workflow section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">How The Platform Works</span>
@@ -145,6 +163,7 @@
       </div>
     </section>
 
+    <!-- Technology section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Technology Foundation</span>
@@ -174,6 +193,7 @@
       </div>
     </section>
 
+    <!-- Principles section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Core Principles</span>
@@ -210,6 +230,7 @@
       </div>
     </section>
 
+    <!-- Notice section -->
     <section class="public-section">
       <div class="section-heading">
         <span class="section-eyebrow">Clinical Use Notice</span>
@@ -224,15 +245,16 @@
         </p>
       </div>
     </section>
-
   </main>
 
+  <!-- --------------------------------------------------
+       Footer
+  --------------------------------------------------- -->
   <footer class="public-footer">
     <div class="footer-container">
       <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
       <p>Designed for hospitals, NHS settings, healthcare professionals, and cardiology-focused clinical workflows.</p>
     </div>
   </footer>
-
 </body>
 </html>

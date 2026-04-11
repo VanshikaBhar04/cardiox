@@ -1,38 +1,68 @@
+# --------------------------------------------------
+# CardioX Model Inference
+# --------------------------------------------------
+
+# Loads the trained machine learning model and provides
+# a simple prediction interface for cardiovascular risk output.
+
 import joblib
 import pandas as pd
 
+
+# --------------------------------------------------
+# Model Loading
+# --------------------------------------------------
+
 MODEL_PATH = "artifacts/final_model.joblib"
 
-# Load once
+# Load the trained model once at startup to avoid repeated disk reads
 _model = joblib.load(MODEL_PATH)
 
+
+# --------------------------------------------------
+# Risk Classification Helpers
+# --------------------------------------------------
+
 def risk_band(risk_percent: float) -> str:
-    """Simple prototype bands for UI (not clinical thresholds)."""
+    """
+    Converts a predicted risk percentage into a UI-friendly risk band.
+    These are prototype display bands and not clinical thresholds.
+    """
     if risk_percent < 30:
         return "Low"
     if risk_percent < 60:
         return "Moderate"
     return "High"
 
+
+# --------------------------------------------------
+# Prediction Logic
+# --------------------------------------------------
+
 def predict_risk(patient: dict) -> dict:
     """
-    patient: dict of raw feature values (same names as dataset columns, excluding target)
-    returns: risk percent + band
+    Accepts a patient feature dictionary using the same column names
+    as the training dataset and returns a risk percentage with a UI band.
     """
-    # Convert to DataFrame with one row
+    # Convert the raw patient dictionary into a single-row DataFrame
     X = pd.DataFrame([patient])
 
-    # Predict probability of class 1
+    # Predict the probability of the positive class
     prob = float(_model.predict_proba(X)[:, 1][0])
     risk_percent = prob * 100
 
     return {
         "risk_percent": round(risk_percent, 2),
-        "risk_band": risk_band(risk_percent)
+        "risk_band": risk_band(risk_percent),
     }
 
+
+# --------------------------------------------------
+# Local Test Example
+# --------------------------------------------------
+
 if __name__ == "__main__":
-    # This is an example patient
+    # Example patient used for quick local testing of inference output
     example_patient = {
         "age": 63,
         "sex": "Male",
@@ -46,7 +76,7 @@ if __name__ == "__main__":
         "oldpeak": 2.3,
         "slope": "downsloping",
         "ca": 0.0,
-        "thal": "fixed defect"
+        "thal": "fixed defect",
     }
 
     print(predict_risk(example_patient))

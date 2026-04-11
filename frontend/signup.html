@@ -1,13 +1,24 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- --------------------------------------------------
+       Document metadata
+  --------------------------------------------------- -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+
   <title>Request Clinician Access | CardioX</title>
+
+  <!-- Shared stylesheet -->
   <link rel="stylesheet" href="assets/styles.css" />
+
+  <!-- Session helpers must load before any script that depends on them -->
   <script src="assets/session.js"></script>
+
+  <!-- Redirect authenticated users to their role-based dashboard -->
   <script>
     const session = getSession();
+
     if (session.token && session.role) {
       window.location.replace(getDashboardUrlByRole(session.role));
     }
@@ -15,13 +26,18 @@
 </head>
 
 <body class="auth-page">
+  <!-- --------------------------------------------------
+       Shared navigation
+  --------------------------------------------------- -->
+  <div id="navbarContainer"></div>
+  <script src="assets/navbar.js"></script>
 
-<div id="navbarContainer"></div>
-<script src="assets/navbar.js"></script>
-
+  <!-- --------------------------------------------------
+       Main signup content
+  --------------------------------------------------- -->
   <main class="auth-shell">
     <section class="auth-layout">
-
+      <!-- Signup information panel -->
       <div class="auth-hero-panel">
         <span class="hero-badge">Clinician Access</span>
         <h1>Request access to CardioX.</h1>
@@ -48,6 +64,7 @@
         </div>
       </div>
 
+      <!-- Signup form card -->
       <section class="card auth-card auth-card-wide">
         <div class="auth-card-header">
           <h2>Clinician Access Request</h2>
@@ -91,7 +108,7 @@
           </div>
 
           <div class="auth-form-actions">
-            <button type="submit" class="primary auth-submit-btn">Request Access</button>
+            <button id="btnSignupSubmit" type="submit" class="primary auth-submit-btn">Request Access</button>
           </div>
 
           <p id="signupStatus" class="status"></p>
@@ -102,10 +119,10 @@
           <a href="login.html" class="inline-link">Sign in</a>
         </p>
       </section>
-
     </section>
   </main>
 
+  <!-- Page-specific script -->
   <script src="assets/signup.js"></script>
 </body>
 </html>
