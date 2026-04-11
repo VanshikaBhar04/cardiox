@@ -44,6 +44,8 @@ from app.db import (
     delete_user_admin,
     approve_user_request,
     deny_user_request,
+    create_full_user,
+    count_admin_users,
 
      # Clinician - patient management
     create_patient,
@@ -149,6 +151,14 @@ class ClinicianUpdateInput(BaseModel):
     first_name: str
     last_name: str
 
+class AdminUserCreateInput(BaseModel):
+    username: str
+    password: str
+    first_name: str
+    last_name: str
+    email: EmailStr
+    department: str
+    role: str
 
 class PatientCreateInput(BaseModel):
     first_name: str
@@ -427,9 +437,63 @@ def admin_update_user(
     department = payload.department.strip()
 
     target = get_user_by_id(user_id)
-    ok = update_user_admin(user_id, first_name, last_name, role, department)
+
+    try:
+        ok = update_user_admin(user_id, first_name, last_name, role, department)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
     if not ok:
         raise HTTPException(status_code=404, detail="User not found")
+
+    create_audit_log(
+        actor_user_id=admin["id"],
+        action="update_user",
+        target_user_id=user_id,
+        target_username=target["username"] if target else None,
+        details=f"Updated role={role}, department={department}"
+    )
+
+    return {"updated": True, "id": user_id}
+    
+@app.post("/admin/users")
+def admin_create_user(
+    payload: AdminUserCreateInput,
+    admin=Depends(require_role("admin"))
+):
+    username = validate_username(payload.username)
+    password = validate_password(payload.password)
+    first_name = letters_only_name(payload.first_name, "First name")
+    last_name = letters_only_name(payload.last_name, "Last name")
+    role = validate_role(payload.role)
+    email = payload.email.strip()
+    department = payload.department.strip()
+
+    if get_user_by_username(username) is not None:
+        raise HTTPException(status_code=400, detail="Username already exists")
+
+    if get_user_by_email(email) is not None:
+        raise HTTPException(status_code=400, detail="Email already exists")
+
+    created = create_full_user(
+        username=username,
+        password_hash=hash_password(password),
+        role=role,
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        department=department,
+    )
+
+    create_audit_log(
+        actor_user_id=admin["id"],
+        action="create_user",
+        target_user_id=created["id"],
+        target_username=created["username"],
+        details=f"Created user with role={role}"
+    )
+
+    return created
 
     create_audit_log(
         actor_user_id=admin["id"],

@@ -6,6 +6,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
+import os
 
 
 # Password hashing configuration (bcrypt)
@@ -18,7 +19,7 @@ def verify_password(password: str, password_hash: str) -> bool:
     return pwd_context.verify(password, password_hash)
 
 # JWT configuration (token signing)
-SECRET_KEY = "CHANGE_ME_TO_A_LONG_RANDOM_SECRET"
+SECRET_KEY = os.getenv("CARDIOX_SECRET_KEY", "dev-only-secret-change-this")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 

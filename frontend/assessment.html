@@ -213,21 +213,6 @@
           </div>
         </section>
 
-        <section class="card assessment-card" id="adviceSection">
-          <div class="section-header-row">
-            <div>
-              <h2>Personalised Advice</h2>
-              <p class="section-subtext">
-                Source-backed advice derived from the current assessment.
-              </p>
-            </div>
-          </div>
-
-          <div id="adviceList" class="advice-card-list">
-            <p class="note">Advice will appear after prediction.</p>
-          </div>
-        </section>
-
         <section class="card assessment-card">
           <div class="section-header-row">
             <div>
@@ -265,61 +250,78 @@
           </div>
         </section>
 
+        <section class="card assessment-card" id="adviceSection">
+          <div class="section-header-row">
+            <div>
+              <h2>Personalised Advice</h2>
+              <p class="section-subtext">
+                Source-backed advice derived from the current assessment.
+              </p>
+            </div>
+          </div>
+
+          <div id="adviceList" class="advice-card-list">
+            <p class="note">Advice will appear after prediction.</p>
+          </div>
+        </section>
+
       </div>
 
       <!-- RIGHT COLUMN -->
-      <aside class="assessment-right-column">
+<aside class="assessment-right-column">
 
-        <section class="card assessment-card sticky-panel">
-          <div class="section-header-row">
-            <div>
-              <h2>Selected Patient</h2>
-              <p class="section-subtext">Current patient for this assessment.</p>
-            </div>
-          </div>
+  <div class="assessment-sticky-wrap">
+    <section class="card assessment-card" id="assessmentSelectedPatientPanel">
+      <div class="section-header-row">
+        <div>
+          <h2>Selected Patient</h2>
+          <p class="section-subtext">Current patient for this assessment.</p>
+        </div>
+      </div>
 
-          <div id="patientSummary" class="selected-patient-green-card">
-            <p class="note">Loading patient...</p>
-          </div>
+      <div id="patientSummary" class="selected-patient-green-card">
+        <p class="note">Loading patient...</p>
+      </div>
 
-          <div class="actions assessment-side-button-stack">
-            <button id="btnBack" type="button" class="primary">Back to Patient Management</button>
-            <button id="btnExportPatientReport" type="button" class="primary">Export Report for Patient</button>
-            <button id="btnExportClinicianReport" type="button" class="primary">Export Report for Clinician</button>
-          </div>
+      <div class="actions assessment-side-button-stack">
+        <button id="btnBack" type="button" class="primary">Back to Patient Management</button>
+        <button id="btnExportPatientReport" type="button" class="primary">Export Report for Patient</button>
+        <button id="btnExportClinicianReport" type="button" class="primary">Export Report for Clinician</button>
+      </div>
 
-          <p class="patient-side-note">
-            Reports use the currently selected assessment record.
-          </p>
-        </section>
+      <p class="patient-side-note">
+        Reports use the currently selected assessment record.
+      </p>
+    </section>
+  </div>
 
-        <section class="card assessment-card">
-          <div class="section-header-row">
-            <div>
-              <h2>Assessment History</h2>
-              <p class="section-subtext">Open, edit, or delete previous saved assessments.</p>
-            </div>
-          </div>
+  <section class="card assessment-card">
+    <div class="section-header-row">
+      <div>
+        <h2>Assessment History</h2>
+        <p class="section-subtext">Open, edit, or delete previous saved assessments.</p>
+      </div>
+    </div>
 
-          <div id="assessmentHistory" class="history assessment-history-list">
-            <p class="note">Loading assessments…</p>
-          </div>
-        </section>
+    <div id="assessmentHistory" class="history assessment-history-list">
+      <p class="note">Loading assessments…</p>
+    </div>
+  </section>
 
-      </aside>
+</aside>
 
     </section>
   </main>
 
   <footer class="public-footer">
-  <div class="footer-container">
-    <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
-    <p>
-      Designed for hospitals, NHS settings, healthcare professionals, and
-      cardiology-focused clinical workflows.
-    </p>
-  </div>
-</footer>
+    <div class="footer-container">
+      <p><strong>CardioX</strong> — AI-Powered Cardiovascular Decision Support Platform</p>
+      <p>
+        Designed for hospitals, NHS settings, healthcare professionals, and
+        cardiology-focused clinical workflows.
+      </p>
+    </div>
+  </footer>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {

@@ -50,6 +50,64 @@
       </div>
     </section>
 
+    <section class="card dashboard-card admin-section-card">
+  <div class="section-header-row admin-section-header">
+    <div>
+      <h2>Create User Account</h2>
+      <p class="section-subtext">Create a new admin or staff account directly from the dashboard.</p>
+    </div>
+  </div>
+
+  <form id="createUserForm" class="form-grid dashboard-form-grid admin-edit-form">
+    <label>
+      Username
+      <input id="createUsername" type="text" required />
+    </label>
+
+    <label>
+      Password
+      <input id="createPassword" type="password" required />
+    </label>
+
+    <label>
+      First Name
+      <input id="createFirstName" type="text" required />
+    </label>
+
+    <label>
+      Last Name
+      <input id="createLastName" type="text" required />
+    </label>
+
+    <label>
+      Email
+      <input id="createEmail" type="email" required />
+    </label>
+
+    <label>
+      Department / Ward
+      <input id="createDepartment" type="text" required />
+    </label>
+
+    <label>
+      Role
+      <select id="createRole" required>
+        <option value="admin">Admin</option>
+        <option value="clinician">Clinician</option>
+        <option value="manager">Manager</option>
+        <option value="employee">Employee</option>
+        <option value="it_technician">IT Technician</option>
+      </select>
+    </label>
+
+    <div class="actions admin-edit-actions">
+      <button type="submit" class="primary">Create User</button>
+    </div>
+
+    <p id="createUserStatus" class="status"></p>
+  </form>
+</section>
+
     <div class="admin-sections-stack">
 
       <section class="card dashboard-card admin-section-card">

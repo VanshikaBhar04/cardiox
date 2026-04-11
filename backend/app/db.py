@@ -307,6 +307,52 @@ def create_pending_clinician_user(
 # Admin - Full User Management
 # --------------------------------------------------
 
+def count_admin_users() -> int:
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) AS total FROM users WHERE role = 'admin'")
+    row = cur.fetchone()
+    conn.close()
+    return int(row["total"]) if row else 0
+
+
+def create_full_user(
+    username: str,
+    password_hash: str,
+    role: str,
+    first_name: str,
+    last_name: str,
+    email: str,
+    department: str
+) -> dict:
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO users (
+            created_at, username, password_hash, role,
+            first_name, last_name, email, department, approval_status
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            datetime.utcnow().isoformat(),
+            username,
+            password_hash,
+            role,
+            first_name,
+            last_name,
+            email,
+            department,
+            "approved",
+        ),
+    )
+    conn.commit()
+    new_id = cur.lastrowid
+    conn.close()
+    return get_user_by_id(new_id)
+
+
 def list_all_users() -> list[dict]:
     conn = get_conn()
     cur = conn.cursor()
@@ -387,6 +433,22 @@ def delete_clinician(clinician_id: int) -> bool:
 def update_user_admin(user_id: int, first_name: str, last_name: str, role: str, department: str) -> bool:
     conn = get_conn()
     cur = conn.cursor()
+
+    cur.execute("SELECT role FROM users WHERE id = ?", (user_id,))
+    existing = cur.fetchone()
+    if not existing:
+        conn.close()
+        return False
+
+    current_role = existing["role"]
+
+    if current_role == "admin" and role != "admin":
+        cur.execute("SELECT COUNT(*) AS total FROM users WHERE role = 'admin'")
+        admin_count = cur.fetchone()["total"]
+        if admin_count <= 1:
+            conn.close()
+            raise ValueError("Cannot remove admin role from the last remaining admin.")
+
     cur.execute(
         """
         UPDATE users
@@ -404,6 +466,20 @@ def update_user_admin(user_id: int, first_name: str, last_name: str, role: str, 
 def delete_user_admin(user_id: int) -> bool:
     conn = get_conn()
     cur = conn.cursor()
+
+    cur.execute("SELECT role FROM users WHERE id = ?", (user_id,))
+    row = cur.fetchone()
+    if not row:
+        conn.close()
+        return False
+
+    if row["role"] == "admin":
+        cur.execute("SELECT COUNT(*) AS total FROM users WHERE role = 'admin'")
+        admin_count = cur.fetchone()["total"]
+        if admin_count <= 1:
+            conn.close()
+            raise ValueError("Cannot delete the last remaining admin.")
+
     cur.execute("DELETE FROM users WHERE id = ?", (user_id,))
     ok = cur.rowcount > 0
     conn.commit()

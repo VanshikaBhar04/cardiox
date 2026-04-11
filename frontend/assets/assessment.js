@@ -30,6 +30,7 @@ let clinicalChart = null;
 let cachedAssessments = [];
 let selectedPatient = null;
 let editingAssessmentId = null;
+let refreshAssessmentPinnedPanel = null;
 
 function authHeaders() {
   return {
@@ -136,6 +137,7 @@ function renderPatientSummary(p) {
       </div>
     </div>
   `;
+
 }
 
 async function loadingTheWelcome() {
@@ -163,7 +165,10 @@ async function loadAssessmentById(assessmentId) {
     { headers: authHeaders() }
   );
 
-  if (res.status === 401 || res.status === 403) return forceLogout();
+  if (res.status === 401 || res.status === 403) {
+    forceLogout();
+    return null;
+  }
   if (!res.ok) return null;
   return await res.json();
 }
@@ -173,7 +178,10 @@ async function loadPatient(patient_uid) {
     `${API_BASE}/clinician/patients/${encodeURIComponent(patient_uid)}`,
     { headers: authHeaders() }
   );
-  if (res.status === 401 || res.status === 403) return forceLogout();
+  if (res.status === 401 || res.status === 403) {
+    forceLogout();
+    return null;
+  }
   if (!res.ok) return null;
   return await res.json();
 }
@@ -187,11 +195,86 @@ function applyDemographicsToForm(p) {
   predictForm.sex.disabled = true;
 }
 
-btnBack?.addEventListener("click", () => window.location.href = "clinician.html");
+function pinAssessmentSelectedPatientPanel() {
+  const panel = document.getElementById("assessmentSelectedPatientPanel");
+  const spacer = document.getElementById("assessmentSelectedPatientSpacer");
+  const rightColumn = document.querySelector(".assessment-right-column");
+
+  if (!panel || !spacer || !rightColumn) return;
+
+  let initialTop = null;
+
+  function updatePinnedPanel() {
+    panel.classList.remove("is-pinned");
+    spacer.classList.remove("active");
+    rightColumn.classList.remove("is-pinned-layout");
+
+    panel.style.top = "";
+    panel.style.left = "";
+    panel.style.width = "";
+    panel.style.maxHeight = "";
+    panel.style.overflowY = "";
+    spacer.style.height = "";
+
+    if (window.innerWidth <= 1100) {
+      return;
+    }
+
+    const columnRect = rightColumn.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
+    const navbarOffset = 108;
+    const panelGap = 28;
+
+    if (initialTop === null) {
+      initialTop = panelRect.top;
+    }
+
+    const finalTop = Math.max(initialTop, navbarOffset);
+
+    spacer.classList.add("active");
+    spacer.style.height = `${panel.offsetHeight + panelGap}px`;
+
+    panel.classList.add("is-pinned");
+    rightColumn.classList.add("is-pinned-layout");
+
+    panel.style.top = `${finalTop}px`;
+    panel.style.left = `${columnRect.left}px`;
+    panel.style.width = `${rightColumn.offsetWidth}px`;
+    panel.style.maxHeight = `calc(100vh - ${finalTop + 24}px)`;
+    panel.style.overflowY = "auto";
+  }
+
+  let resizeTimeout;
+  function handleResize() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      initialTop = null;
+      updatePinnedPanel();
+    }, 80);
+  }
+
+  refreshAssessmentPinnedPanel = () => {
+    requestAnimationFrame(() => {
+      updatePinnedPanel();
+    });
+  };
+
+  refreshAssessmentPinnedPanel();
+  window.addEventListener("resize", handleResize);
+  window.addEventListener("load", refreshAssessmentPinnedPanel);
+}
+
+btnBack?.addEventListener("click", () => {
+  window.location.href = "clinician.html";
+});
+
 btnLogout?.addEventListener("click", forceLogout);
 
 btnRecommendation?.addEventListener("click", () => {
-  document.getElementById("adviceSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document.getElementById("adviceSection")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
 });
 
 async function openProtectedPdf(url) {
@@ -326,32 +409,34 @@ function renderShap(xai) {
     return;
   }
 
-  const maxAbs = Math.max(...factors.map(f => Math.abs(Number(f.shap) || 0))) || 1;
+  const maxAbs = Math.max(...factors.map((f) => Math.abs(Number(f.shap) || 0))) || 1;
 
-  shapFactorsEl.innerHTML = factors.map(f => {
-    const featureLabel = f.display_feature || prettifyFeatureName(f.feature);
-    const isIncrease = f.direction === "increases";
-    const width = (Math.abs(Number(f.shap) || 0) / maxAbs) * 100;
+  shapFactorsEl.innerHTML = factors
+    .map((f) => {
+      const featureLabel = f.display_feature || prettifyFeatureName(f.feature);
+      const isIncrease = f.direction === "increases";
+      const width = (Math.abs(Number(f.shap) || 0) / maxAbs) * 100;
 
-    return `
-      <div class="shap-row">
-        <div class="shap-row-top">
-          <div class="shap-feature">${featureLabel}</div>
-          <div class="shap-direction ${isIncrease ? "inc" : "dec"}">
-            ${isIncrease ? "▲ Increasing risk" : "▼ Decreasing risk"}
+      return `
+        <div class="shap-row">
+          <div class="shap-row-top">
+            <div class="shap-feature">${featureLabel}</div>
+            <div class="shap-direction ${isIncrease ? "inc" : "dec"}">
+              ${isIncrease ? "▲ Increasing risk" : "▼ Decreasing risk"}
+            </div>
+          </div>
+
+          <div class="shap-bar-bg">
+            <div class="shap-bar ${isIncrease ? "inc" : "dec"}" style="width:${width}%"></div>
+          </div>
+
+          <div class="shap-row-meta">
+            Value: <strong>${f.value ?? "—"}</strong> • Impact: ${f.shap}
           </div>
         </div>
-
-        <div class="shap-bar-bg">
-          <div class="shap-bar ${isIncrease ? "inc" : "dec"}" style="width:${width}%"></div>
-        </div>
-
-        <div class="shap-row-meta">
-          Value: <strong>${f.value ?? "—"}</strong> • Impact: ${f.shap}
-        </div>
-      </div>
-    `;
-  }).join("");
+      `;
+    })
+    .join("");
 }
 
 function renderAdvice(items) {
@@ -375,7 +460,9 @@ function renderAdvice(items) {
     return;
   }
 
-  adviceListEl.innerHTML = items.map(a => `
+  adviceListEl.innerHTML = items
+    .map(
+      (a) => `
     <div class="advice-card premium-advice-card">
       <div class="advice-card-top">
         <div>
@@ -398,7 +485,9 @@ function renderAdvice(items) {
         }
       </div>
     </div>
-  `).join("");
+  `
+    )
+    .join("");
 }
 
 const METRIC_META = {
@@ -585,11 +674,11 @@ function updateClinicalChart(metric) {
 
   const items = [...(cachedAssessments || [])].sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
 
-  const labels = items.map(a => parseDateLabel(a.created_at));
-  const patientValues = items.map(a => getDisplayValue(metric, a));
-  const refValues = items.map(a => {
+  const labels = items.map((a) => parseDateLabel(a.created_at));
+  const patientValues = items.map((a) => getDisplayValue(metric, a));
+  const refValues = items.map((a) => {
     const v = getReferenceForMetric(metric, a);
-    return (v === null || v === undefined) ? null : Number(v);
+    return v === null || v === undefined ? null : Number(v);
   });
 
   const meta = METRIC_META[metric] || { label: metric, unit: "" };
@@ -606,20 +695,22 @@ function updateClinicalChart(metric) {
       pointRadius: 4,
       pointHoverRadius: 6
     },
-    ...(refValues.some(v => v !== null)
-      ? [{
-          label: "Reference",
-          data: refValues,
-          spanGaps: true,
-          borderDash: [6, 6],
-          tension: 0,
-          borderWidth: 2,
-          pointRadius: 0
-        }]
+    ...(refValues.some((v) => v !== null)
+      ? [
+          {
+            label: "Reference",
+            data: refValues,
+            spanGaps: true,
+            borderDash: [6, 6],
+            tension: 0,
+            borderWidth: 2,
+            pointRadius: 0
+          }
+        ]
       : [])
   ];
 
-  const allValues = [...patientValues, ...refValues].filter(v => Number.isFinite(v));
+  const allValues = [...patientValues, ...refValues].filter((v) => Number.isFinite(v));
 
   if (allValues.length) {
     const min = Math.min(...allValues);
@@ -704,7 +795,10 @@ predictForm?.addEventListener("submit", async (e) => {
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      const msg = typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail, null, 2);
+      const msg =
+        typeof data.detail === "string"
+          ? data.detail
+          : JSON.stringify(data.detail, null, 2);
       setPredictStatus(msg || `Prediction failed (${res.status}).`, true);
       return;
     }
@@ -724,7 +818,9 @@ predictForm?.addEventListener("submit", async (e) => {
 
       if (data.assessment?.id) {
         editingAssessmentId = data.assessment.id;
-        const newUrl = `assessment.html?patient_uid=${encodeURIComponent(patient_uid)}&assessment_id=${encodeURIComponent(editingAssessmentId)}`;
+        const newUrl = `assessment.html?patient_uid=${encodeURIComponent(
+          patient_uid
+        )}&assessment_id=${encodeURIComponent(editingAssessmentId)}`;
         window.history.replaceState({}, "", newUrl);
       }
     }
@@ -767,10 +863,13 @@ async function deleteAssessment(assessmentId) {
   if (!ok) return;
 
   try {
-    const res = await fetch(`${API_BASE}/clinician/assessments/${encodeURIComponent(assessmentId)}`, {
-      method: "DELETE",
-      headers: authHeaders()
-    });
+    const res = await fetch(
+      `${API_BASE}/clinician/assessments/${encodeURIComponent(assessmentId)}`,
+      {
+        method: "DELETE",
+        headers: authHeaders()
+      }
+    );
 
     if (res.status === 401 || res.status === 403) {
       forceLogout();
@@ -784,7 +883,9 @@ async function deleteAssessment(assessmentId) {
 
     if (String(editingAssessmentId) === String(assessmentId)) {
       editingAssessmentId = null;
-      const newUrl = `assessment.html?patient_uid=${encodeURIComponent(selectedPatient.patient_uid)}`;
+      const newUrl = `assessment.html?patient_uid=${encodeURIComponent(
+        selectedPatient.patient_uid
+      )}`;
       window.history.replaceState({}, "", newUrl);
       renderShap(null);
       renderAdvice(null);
@@ -810,10 +911,16 @@ function renderAssessmentHistory(items) {
       "No previous assessments",
       "This patient does not yet have any saved assessment history."
     );
+
+    if (typeof refreshAssessmentPinnedPanel === "function") {
+      refreshAssessmentPinnedPanel();
+    }
     return;
   }
 
-  assessmentHistoryEl.innerHTML = items.map(a => `
+  assessmentHistoryEl.innerHTML = items
+    .map(
+      (a) => `
     <div class="history-item">
       <div class="assessment-history-main">
         <div class="history-meta">
@@ -834,18 +941,22 @@ function renderAssessmentHistory(items) {
         <button type="button" class="danger" data-delete-assessment="${a.id}">Delete</button>
       </div>
     </div>
-  `).join("");
+  `
+    )
+    .join("");
 
-  document.querySelectorAll("[data-edit-assessment]").forEach(btn => {
+  document.querySelectorAll("[data-edit-assessment]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const id = btn.getAttribute("data-edit-assessment");
-      const a = items.find(x => String(x.id) === String(id));
+      const a = items.find((x) => String(x.id) === String(id));
       if (!a) return;
 
       loadAssessmentIntoForm(a);
       editingAssessmentId = a.id;
 
-      const newUrl = `assessment.html?patient_uid=${encodeURIComponent(selectedPatient.patient_uid)}&assessment_id=${encodeURIComponent(editingAssessmentId)}`;
+      const newUrl = `assessment.html?patient_uid=${encodeURIComponent(
+        selectedPatient.patient_uid
+      )}&assessment_id=${encodeURIComponent(editingAssessmentId)}`;
       window.history.replaceState({}, "", newUrl);
 
       const metric = metricSelectEl?.value || "trestbps";
@@ -853,12 +964,16 @@ function renderAssessmentHistory(items) {
     });
   });
 
-  document.querySelectorAll("[data-delete-assessment]").forEach(btn => {
+  document.querySelectorAll("[data-delete-assessment]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const id = btn.getAttribute("data-delete-assessment");
       await deleteAssessment(id);
     });
   });
+
+  if (typeof refreshAssessmentPinnedPanel === "function") {
+    refreshAssessmentPinnedPanel();
+  }
 }
 
 async function loadAssessmentHistory(patient_uid) {
@@ -911,6 +1026,7 @@ async function loadAssessmentHistory(patient_uid) {
   selectedPatient = p;
   renderPatientSummary(p);
   applyDemographicsToForm(p);
+
 
   await loadAssessmentHistory(patient_uid);
 

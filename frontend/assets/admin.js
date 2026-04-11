@@ -19,6 +19,16 @@ const editUserRole = document.getElementById("editUserRole");
 const editUserDepartment = document.getElementById("editUserDepartment");
 const btnCancelUserEdit = document.getElementById("btnCancelUserEdit");
 
+const createUserForm = document.getElementById("createUserForm");
+const createUserStatus = document.getElementById("createUserStatus");
+const createUsername = document.getElementById("createUsername");
+const createPassword = document.getElementById("createPassword");
+const createFirstName = document.getElementById("createFirstName");
+const createLastName = document.getElementById("createLastName");
+const createEmail = document.getElementById("createEmail");
+const createDepartment = document.getElementById("createDepartment");
+const createRole = document.getElementById("createRole");
+
 let cachedUsers = [];
 
 function authHeaders() {
@@ -63,7 +73,8 @@ function formatAuditAction(action) {
     deny_user: "Denied User",
     update_user: "Updated User",
     delete_user: "Deleted User",
-    create_clinician: "Created Clinician"
+    create_clinician: "Created Clinician",
+    create_user: "Created User"
   };
   return map[action] || action || "—";
 }
@@ -215,6 +226,12 @@ function renderAuditLogs(items) {
   `).join("");
 }
 
+function setCreateUserStatus(msg, isError = false) {
+  if (!createUserStatus) return;
+  createUserStatus.textContent = msg;
+  createUserStatus.style.color = isError ? "#dc2626" : "#475569";
+}
+
 async function loadUsers() {
   if (userTableBody) {
     userTableBody.innerHTML = `
@@ -362,6 +379,50 @@ userTableBody?.addEventListener("click", async (e) => {
     } catch (err) {
       setStatus("Network error while deleting user.", true);
     }
+  }
+});
+
+createUserForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    username: createUsername.value.trim(),
+    password: createPassword.value,
+    first_name: createFirstName.value.trim(),
+    last_name: createLastName.value.trim(),
+    email: createEmail.value.trim(),
+    department: createDepartment.value.trim(),
+    role: createRole.value
+  };
+
+  setCreateUserStatus("Creating user...");
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/users`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 401 || res.status === 403) return forceLogout();
+    if (!res.ok) return setCreateUserStatus(data.detail || "Failed to create user.", true);
+
+    setCreateUserStatus("User created successfully.");
+
+    createUsername.value = "";
+    createPassword.value = "";
+    createFirstName.value = "";
+    createLastName.value = "";
+    createEmail.value = "";
+    createDepartment.value = "";
+    createRole.value = "admin";
+
+    await loadUsers();
+    await loadAuditLogs();
+  } catch (err) {
+    setCreateUserStatus("Network error while creating user.", true);
   }
 });
 
