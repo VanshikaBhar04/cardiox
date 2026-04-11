@@ -74,7 +74,7 @@ function formatAuditAction(action) {
     update_user: "Updated User",
     delete_user: "Deleted User",
     create_clinician: "Created Clinician",
-    create_user: "Created User"
+    reset_password: "Reset Password"
   };
   return map[action] || action || "—";
 }

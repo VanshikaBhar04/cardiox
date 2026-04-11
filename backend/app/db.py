@@ -486,6 +486,21 @@ def delete_user_admin(user_id: int) -> bool:
     conn.close()
     return ok
 
+def reset_user_password_admin(user_id: int, password_hash: str) -> bool:
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        UPDATE users
+        SET password_hash = ?
+        WHERE id = ?
+        """,
+        (password_hash, user_id),
+    )
+    ok = cur.rowcount > 0
+    conn.commit()
+    conn.close()
+    return ok
 
 def approve_user_request(user_id: int, approved_role: str) -> bool:
     conn = get_conn()

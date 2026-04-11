@@ -30,6 +30,11 @@ from app.db import (
     create_user,
     get_user_by_email,
     create_pending_clinician_user,
+    update_user_admin,
+    delete_user_admin,
+    approve_user_request,
+    deny_user_request,
+    reset_user_password_admin,
 
     # Admin - clinician management
     create_clinician_user,
@@ -189,6 +194,8 @@ class AdminUserUpdateInput(BaseModel):
     role: str
     department: str
 
+class AdminPasswordResetInput(BaseModel):
+    new_password: str
 
 class ApprovalInput(BaseModel):
     role: str
@@ -297,8 +304,19 @@ def login(payload: LoginInput):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
     # Clinicians must be approved before they can sign in
-    if user["role"] == "clinician" and user.get("approval_status") != "approved":
-        raise HTTPException(status_code=403, detail="Your account is awaiting admin approval.")
+    if user["role"] == "clinician":
+        if user.get("approval_status") == "pending":
+            raise HTTPException(
+                status_code=403,
+                detail="Your account is awaiting admin approval."
+            )
+
+        if user.get("approval_status") == "rejected":
+            reason = user.get("denial_reason") or "No reason provided."
+            raise HTTPException(
+                status_code=403,
+                detail=f"Your account request was declined. Reason: {reason}"
+            )
 
     token = create_access_token({
         "sub": str(user["id"]),
@@ -455,6 +473,32 @@ def admin_update_user(
     )
 
     return {"updated": True, "id": user_id}
+
+@app.put("/admin/users/{user_id}/reset-password")
+def admin_reset_user_password(
+    user_id: int,
+    payload: AdminPasswordResetInput,
+    admin=Depends(require_role("admin"))
+):
+    new_password = validate_password(payload.new_password)
+
+    target = get_user_by_id(user_id)
+    if target is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    ok = reset_user_password_admin(user_id, hash_password(new_password))
+    if not ok:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    create_audit_log(
+        actor_user_id=admin["id"],
+        action="reset_password",
+        target_user_id=user_id,
+        target_username=target["username"],
+        details="Password reset by admin"
+    )
+
+    return {"reset": True, "id": user_id}
     
 @app.post("/admin/users")
 def admin_create_user(
