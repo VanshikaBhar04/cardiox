@@ -212,25 +212,5 @@ The CardioX microsite presents the platform’s functionality, clinical value, a
 Direct link:  
 https://sites.google.com/view/cardioxpredictor/home
 
-## Key Features
 
-- AI-powered cardiovascular risk prediction  
-- Probability-based heart attack risk scoring  
-- Clear and interpretable risk band classification  
-- GDPR-compliant data governance considerations  
-- Designed for NHS clinical decision-support environments  
-
-## Project Purpose
-
-This repository demonstrates the technical concept behind CardioX alongside the digital marketing and search engine optimisation (SEO) strategy used to promote the CardioX microsite. The project illustrates how healthcare AI solutions can be communicated through structured digital marketing, keyword optimisation, and targeted B2B outreach to NHS organisations.
-
----
-## Run the Backend (FastAPI)
-Open a terminal:
-
-```bash
-cd backend
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
 
