@@ -18,7 +18,6 @@ import shap
 
 # --------------------------------------------------
 # Model Loading
-# --------------------------------------------------
 
 # Path to the trained machine learning model artifact
 MODEL_PATH = Path(__file__).resolve().parents[3] / "ml" / "artifacts" / "final_model.joblib"
@@ -29,7 +28,6 @@ _model = joblib.load(MODEL_PATH)
 
 # --------------------------------------------------
 # Risk Helpers
-# --------------------------------------------------
 
 def risk_band(risk_percent: float) -> str:
     """

@@ -29,9 +29,9 @@ from app.ml.inference import predict_risk, explain_risk, generate_advice
 # --------------------------------------------------
 
 from app.auth import (
-    verify_password,
+    password_verification,
     create_access_token,
-    hashing_password,
+    password_hashing,
     get_current_user,
     require_role,
 )
@@ -129,7 +129,7 @@ def on_startup():
 
     admin = get_user_by_username("admin")
     if admin is None:
-        create_a_user("admin", hashing_password("admin123"), "admin")
+        create_a_user("admin", password_hashing("admin123"), "admin")
 
 
 # --------------------------------------------------
@@ -365,7 +365,7 @@ def login(payload: LoginInput):
     user = get_user_by_username(username)
 
     # Validate username and password
-    if not user or not verify_password(payload.password, user["password_hash"]):
+    if not user or not password_verification(payload.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
     # Clinicians must be approved before they can sign in
@@ -416,7 +416,7 @@ def signup(payload: SignupRequest):
 
     created = create_pending_clinician_user(
         username=username,
-        password_hash=hashing_password(password),
+        password_hash=password_hashing(password),
         first_name=first_name,
         last_name=last_name,
         email=email,
@@ -465,7 +465,7 @@ def admin_create_clinician(
 
     created = create_clinician_user(
         username=username,
-        password_hash=hashing_password(password),
+        password_hash=password_hashing(password),
         first_name=first_name,
         last_name=last_name,
     )
@@ -571,7 +571,7 @@ def admin_reset_user_password(
     if target is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    ok = reset_user_password_admin(user_id, hashing_password(new_password))
+    ok = reset_user_password_admin(user_id, password_hashing(new_password))
     if not ok:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -608,7 +608,7 @@ def admin_create_a_user(
 
     created = createfulluser(
         username=username,
-        password_hash=hashing_password(password),
+        password_hash=password_hashing(password),
         role=role,
         first_name=first_name,
         last_name=last_name,

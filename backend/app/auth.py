@@ -20,20 +20,17 @@ from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def hashing_password(password: str) -> str:
+def password_hashing(password: str) -> str:
     # Hashes a plain-text password before storing it in the database
     return pwd_context.hash(password)
 
 
-def verify_password(password: str, password_hash: str) -> bool:
+def password_verification(password: str, password_hash: str) -> bool:
     # Verifies a login password against the stored bcrypt hash
     return pwd_context.verify(password, password_hash)
 
 
-# --------------------------------------------------
 # JWT configuration
-# --------------------------------------------------
-
 # Stores the signing key and token settings used for authentication
 SECRET_KEY = os.getenv("CARDIOX_SECRET_KEY", "dev-only-secret-change-this")
 ALGORITHM = "HS256"
@@ -54,7 +51,6 @@ def create_access_token(
 
 # --------------------------------------------------
 # FastAPI bearer token security
-# --------------------------------------------------
 
 # Extracts bearer tokens from the Authorization header
 bearer_scheme = HTTPBearer()
@@ -105,7 +101,6 @@ def get_current_user(
 
 # --------------------------------------------------
 # Role-based access control
-# --------------------------------------------------
 
 def require_role(required_role: str):
     """

@@ -1,6 +1,5 @@
 // --------------------------------------------------
 // CardioX Login Script
-// --------------------------------------------------
 
 // Handles user authentication, session storage,
 // and role-based redirection after successful login.
@@ -8,14 +7,12 @@
 
 // --------------------------------------------------
 // API configuration
-// --------------------------------------------------
 
 const AUTH_URL = "http://127.0.0.1:8000/auth/login";
 
 
 // --------------------------------------------------
 // Login page elements
-// --------------------------------------------------
 
 const loginForm = document.getElementById("loginForm");
 const loginStatus = document.getElementById("status");
@@ -24,7 +21,6 @@ const btnLoginSubmit = document.getElementById("btnLoginSubmit");
 
 // --------------------------------------------------
 // Session helpers
-// --------------------------------------------------
 
 function setSession({ access_token, role, username }) {
   // Stores authenticated session data for protected page access
@@ -36,7 +32,6 @@ function setSession({ access_token, role, username }) {
 
 // --------------------------------------------------
 // UI feedback helpers
-// --------------------------------------------------
 
 function setLoginStatus(message, isError = false) {
   // Updates the login status message shown to the user
@@ -57,7 +52,6 @@ function setLoginButtonLoading(isLoading) {
 
 // --------------------------------------------------
 // Login form submission
-// --------------------------------------------------
 
 loginForm?.addEventListener("submit", async (e) => {
   e.preventDefault();

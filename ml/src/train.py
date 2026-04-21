@@ -10,11 +10,12 @@ import os
 
 import joblib
 import pandas as pd
+from pathlib import Path
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -23,8 +24,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 # --------------------------------------------------
 # Dataset Loading and Preparation
 # --------------------------------------------------
-
-DATA_PATH = "data/heart_disease_uci.csv"
+DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "heart_disease_uci.csv"
 df = pd.read_csv(DATA_PATH)
 
 # Remove unused source-identifying fields from the original dataset
@@ -130,9 +130,16 @@ rf_probs = rf.predict_proba(X_test)[:, 1]
 log_auc = roc_auc_score(y_test, log_probs)
 rf_auc = roc_auc_score(y_test, rf_probs)
 
-print("\n=== Final Comparison (ROC-AUC) ===")
-print("Logistic Regression:", round(log_auc, 4))
-print("Random Forest:", round(rf_auc, 4))
+# RMSE is calculated on predicted probabilities against
+# the true binary labels as an additional error measure
+log_rmse = mean_squared_error(y_test, log_probs) ** 0.5
+rf_rmse = mean_squared_error(y_test, rf_probs) ** 0.5
+
+print("\n=== Final Comparison ===")
+print("Logistic Regression ROC-AUC:", round(log_auc, 4))
+print("Random Forest ROC-AUC:", round(rf_auc, 4))
+print("Logistic Regression RMSE:", round(log_rmse, 4))
+print("Random Forest RMSE:", round(rf_rmse, 4))
 
 
 # --------------------------------------------------
@@ -160,6 +167,8 @@ with open("artifacts/model_metrics.txt", "w") as f:
     f.write("CardioX - Model Metrics\n")
     f.write(f"Logistic Regression ROC-AUC: {log_auc:.4f}\n")
     f.write(f"Random Forest ROC-AUC: {rf_auc:.4f}\n")
+    f.write(f"Logistic Regression RMSE: {log_rmse:.4f}\n")
+    f.write(f"Random Forest RMSE: {rf_rmse:.4f}\n")
     f.write(f"Selected final model: {final_name}\n")
 
 print("\nSaved artifacts:")

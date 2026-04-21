@@ -415,7 +415,6 @@ def build_clinician_report(story, styles, clinician_name, patient, assessment, e
 
 # --------------------------------------------------
 # Main PDF Export Entry Point
-# --------------------------------------------------
 
 def build_assessment_pdf(
     audience: str,
