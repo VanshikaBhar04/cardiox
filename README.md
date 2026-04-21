@@ -67,28 +67,6 @@ The system is designed to reflect real-world clinical workflows and supports cli
 - JSON Web Tokens (JWT)
 
 ---
-
-## Project Structure
-
-cardiox/
-│
-├── app/
-│ ├── auth/ # Authentication (JWT, password hashing)
-│ ├── db.py # Database logic (SQLite)
-│ ├── ml/ # Machine learning model and inference
-│ ├── reporting/ # PDF report generation
-│
-├── assets/
-│ ├── styles.css
-│ ├── clinician.js
-│ ├── admin.js
-│ ├── navbar.js
-│
-├── main.py # FastAPI application entry point
-├── cardiox.db # Local SQLite database
-├── README.md
-
-
 ## How to Run the Project Locally
 
 ### 1. Clone the Repository
